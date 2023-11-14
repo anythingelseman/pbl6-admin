@@ -30,7 +30,7 @@ export default function LoginPage() {
     console.log(formData);
     try {
       const response = await axios.post(
-        `http://cinemawebapi.ddns.net:8001/api/identity/token`,
+        `http://cinemawebapi.ddns.net:8001/api/identity/token/`,
         JSON.stringify(formData),
         {
           headers: {
