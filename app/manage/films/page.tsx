@@ -735,7 +735,7 @@ const FilmRow: React.FC<{ data: FilmData | undefined }> = ({ data }) => {
   );
 };
 
-export const Pagination: React.FC<PaginationComponentProps> = ({
+const Pagination: React.FC<PaginationComponentProps> = ({
   filmApiResponse,
   currentSearched,
   setFilmApiResponse,

@@ -223,8 +223,7 @@ const CategoryRow: React.FC<{ data: MovieCategory | undefined }> = ({
     </Table.Row>
   );
 };
-
-export const Pagination: React.FC<PaginationComponentProps> = ({
+const Pagination: React.FC<PaginationComponentProps> = ({
   categoryData,
   currentSearched,
   setCategoryData,

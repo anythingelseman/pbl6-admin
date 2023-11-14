@@ -578,8 +578,7 @@ const RoomRow: React.FC<{
     </Table.Row>
   );
 };
-
-export const Pagination: React.FC<PaginationComponentProps> = ({
+const Pagination: React.FC<PaginationComponentProps> = ({
   roomApiResponse,
   currentSearched,
   setRoomApiResponse,
