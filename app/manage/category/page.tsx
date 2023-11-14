@@ -1,5 +1,6 @@
 "use client";
 
+import apiClient from "@/services/apiClient";
 import { Button, Label, Modal, Table, TextInput } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
@@ -41,8 +42,8 @@ export default function CategoryPage() {
   const [currentSearched, setCurrentSearched] = useState("");
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch(`${apiUrl}/category?OrderBy=id`);
-      const data = await response.json();
+      const response = await apiClient.get(`/category?OrderBy=id`);
+      const data = response.data;
       setCategoryData(data);
       console.log(data);
     };
@@ -56,10 +57,10 @@ export default function CategoryPage() {
   const searchHandle = async () => {
     try {
       setCurrentSearched(searchTerm);
-      const response = await fetch(
-        `${apiUrl}/category?Keyword=${searchTerm}&OrderBy=id`
+      const response = await apiClient.get(
+        `/category?Keyword=${searchTerm}&OrderBy=id`
       );
-      const data = await response.json();
+      const data = response.data;
       setCategoryData(data);
       console.log(data);
     } catch (error) {
@@ -139,14 +140,11 @@ const AddProductModal = function () {
     console.log(formData);
     setOpen(false);
     try {
-      const response = await fetch(`${apiUrl}/category`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-      const result = await response.json();
+      const response = await apiClient.post(
+        `${apiUrl}/category`,
+        JSON.stringify(formData)
+      );
+      const result = response.data;
       console.log("Data posted successfully:", result);
       location.reload();
     } catch (error) {
@@ -234,12 +232,12 @@ export const Pagination: React.FC<PaginationComponentProps> = ({
   const NextPageHandle = async () => {
     try {
       if (!categoryData) return;
-      const response = await fetch(
-        `${apiUrl}/category?Keyword=${currentSearched}&PageNumber=${
+      const response = await apiClient.get(
+        `/category?Keyword=${currentSearched}&PageNumber=${
           categoryData?.currentPage + 1
         }&OrderBy=id`
       );
-      const data = await response.json();
+      const data = response.data;
       setCategoryData(data);
       console.log(data);
     } catch (error) {
@@ -250,12 +248,12 @@ export const Pagination: React.FC<PaginationComponentProps> = ({
   const PreviousPageHandle = async () => {
     try {
       if (!categoryData) return;
-      const response = await fetch(
-        `${apiUrl}/category?Keyword=${currentSearched}&PageNumber=${
+      const response = await apiClient.get(
+        `/category?Keyword=${currentSearched}&PageNumber=${
           categoryData?.currentPage - 1
         }&OrderBy=id`
       );
-      const data = await response.json();
+      const data = response.data();
       setCategoryData(data);
       console.log(data);
     } catch (error) {

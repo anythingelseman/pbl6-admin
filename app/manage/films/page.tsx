@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import apiClient from "@/services/apiClient";
 import {
   Button,
   Label,
@@ -93,20 +94,22 @@ export default function FilmsPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch(`${apiUrl}/film?OrderBy=id`);
-      const data = await response.json();
-      setFilmApiResponse(data);
-      console.log(data);
+      const response = await apiClient.get<FilmApiResponse | undefined>(
+        `/film?OrderBy=id`
+      );
+      setFilmApiResponse(response.data);
+      console.log(response.data);
     };
     fetchData();
   }, []);
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch(`${apiUrl}/category?PageSize=50&OrderBy=id`);
-      const data = await response.json();
-      setCategoryApiResponse(data);
-      console.log(data);
+      const response = await apiClient.get<CategoryApiResponse | undefined>(
+        `/category?PageSize=50&OrderBy=id`
+      );
+      setCategoryApiResponse(response.data);
+      console.log(response.data);
     };
     fetchData();
   }, []);
@@ -118,12 +121,10 @@ export default function FilmsPage() {
   const searchHandle = async () => {
     try {
       setCurrentSearched(searchTerm);
-      const response = await fetch(
-        `${apiUrl}/film?Keyword=${searchTerm}&OrderBy=id`
+      const response = await apiClient.get<FilmApiResponse | undefined>(
+        `/film?Keyword=${searchTerm}&OrderBy=id`
       );
-      const data = await response.json();
-      setFilmApiResponse(data);
-      console.log(data);
+      setFilmApiResponse(response.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -282,17 +283,13 @@ const AddProductModal: React.FC<{
 
     Promise.all(uploadPromises)
       .then(async (uploadedImages) => {
-        const response = await fetch(`${apiUrl}/film`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ ...formData, fileImages: uploadedImages }),
-        });
+        const response = await apiClient.post(
+          `/film`,
+          JSON.stringify({ ...formData, fileImages: uploadedImages })
+        );
 
-        const result = await response.json();
-        console.log("Data film posted successfully:", result);
-        return result;
+        console.log("Data film posted successfully:", response.data);
+        return response.data;
       })
       .then((result) => {
         location.reload();
@@ -597,20 +594,16 @@ const DeleteProductModal: React.FC<{
   const [isOpen, setOpen] = useState(false);
   const deleteHandle = () => {
     setOpen(false);
-    fetch(`${apiUrl}/film?Id=${filmId}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
+    apiClient
+      .delete(`/film?Id=${filmId}`)
+      // .then((response) => {
+      //   if (!response.status ) {
+      //     throw new Error("Network response was not ok");
+      //   }
+      //   return response.data;
+      // })
       .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Delete request was successful:", data);
+        console.log("Delete request was successful:", response.data);
         location.reload();
       })
       .catch((error) => {
@@ -758,14 +751,13 @@ export const Pagination: React.FC<PaginationComponentProps> = ({
   const NextPageHandle = async () => {
     try {
       if (!filmApiResponse) return;
-      const response = await fetch(
-        `${apiUrl}/film?Keyword=${currentSearched}&PageNumber=${
+      const response = await apiClient.get<FilmApiResponse | undefined>(
+        `/film?Keyword=${currentSearched}&PageNumber=${
           filmApiResponse?.currentPage + 1
         }&OrderBy=id`
       );
-      const data = await response.json();
-      setFilmApiResponse(data);
-      console.log(data);
+      setFilmApiResponse(response.data);
+      console.log(response.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -774,12 +766,12 @@ export const Pagination: React.FC<PaginationComponentProps> = ({
   const PreviousPageHandle = async () => {
     try {
       if (!filmApiResponse) return;
-      const response = await fetch(
-        `${apiUrl}/film?Keyword=${currentSearched}&PageNumber=${
+      const response = await apiClient.get(
+        `/film?Keyword=${currentSearched}&PageNumber=${
           filmApiResponse?.currentPage - 1
         }&OrderBy=id`
       );
-      const data = await response.json();
+      const data = response.data;
       setFilmApiResponse(data);
       console.log(data);
     } catch (error) {

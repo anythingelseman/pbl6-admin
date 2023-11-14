@@ -11,6 +11,7 @@ import {
   Select,
 } from "flowbite-react";
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import { FaPlus } from "react-icons/fa";
 import {
   HiOutlineExclamationCircle,
@@ -205,12 +206,17 @@ const AddRoomModal: React.FC<{
       body: JSON.stringify(formData),
     })
       .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((response) => {
         const result = response.json();
         console.log("Post request was successful:", result);
-        location.reload();
       })
       .catch((error) => {
-        console.error("Error posting data:", error);
+        toast.error("Error posting data", error);
       });
   };
 

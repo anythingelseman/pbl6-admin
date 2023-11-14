@@ -1,5 +1,6 @@
 "use client";
 
+import apiClient from "@/services/apiClient";
 import {
   Button,
   Label,
@@ -58,8 +59,10 @@ export default function CinemaPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch(`${apiUrl}/cinema?OrderBy=id`);
-      const data = await response.json();
+      const response = await apiClient.get<CinemaApiResponse | undefined>(
+        `/cinema?OrderBy=id`
+      );
+      const data = response.data;
       setCinemaApiResponse(data);
       console.log(data);
     };
@@ -73,10 +76,10 @@ export default function CinemaPage() {
   const searchHandle = async () => {
     try {
       setCurrentSearched(searchTerm);
-      const response = await fetch(
-        `${apiUrl}/cinema?Keyword=${searchTerm}&OrderBy=id`
+      const response = await apiClient.get(
+        `/cinema?Keyword=${searchTerm}&OrderBy=id`
       );
-      const data = await response.json();
+      const data = response.data;
       setCinemaApiResponse(data);
       console.log(data);
     } catch (error) {
@@ -155,16 +158,10 @@ const AddCinemaModal = function () {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    fetch(`${apiUrl}/cinema`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    })
+    apiClient
+      .post(`${apiUrl}/cinema`, JSON.stringify(formData))
       .then((response) => {
-        const result = response.json();
-        console.log("Post request was successful:", result);
+        console.log("Post request was successful:", response.data);
         location.reload();
       })
       .catch((error) => {
@@ -281,15 +278,10 @@ const EditProductModal: React.FC<{
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    fetch(`${apiUrl}/cinema`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    })
+    apiClient
+      .put(`${apiUrl}/cinema`, JSON.stringify(formData))
       .then((response) => {
-        const result = response.json();
+        const result = response.data;
         console.log("Put request was successful:", result);
         location.reload();
       })
@@ -360,20 +352,16 @@ const DeleteProductModal: React.FC<{
   const [isOpen, setOpen] = useState(false);
   const deleteHandle = () => {
     setOpen(false);
-    fetch(`${apiUrl}/cinema?Id=${cinemaId}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
+    apiClient
+      .delete(`/cinema?Id=${cinemaId}`)
+      // .then((response) => {
+      //   if (!response.ok) {
+      //     throw new Error("Network response was not ok");
+      //   }
+      //   return response.json();
+      // })
       .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Delete request was successful:", data);
+        console.log("Delete request was successful:", response.data);
         location.reload();
       })
       .catch((error) => {
@@ -498,12 +486,12 @@ export const Pagination: React.FC<PaginationComponentProps> = ({
   const NextPageHandle = async () => {
     try {
       if (!cinemaApiResponse) return;
-      const response = await fetch(
-        `${apiUrl}/cinema?Keyword=${currentSearched}&PageNumber=${
+      const response = await apiClient.get(
+        `/cinema?Keyword=${currentSearched}&PageNumber=${
           cinemaApiResponse?.currentPage + 1
         }&OrderBy=id`
       );
-      const data = await response.json();
+      const data = response.data;
       setCinemaApiResponse(data);
       console.log(data);
     } catch (error) {
@@ -514,12 +502,12 @@ export const Pagination: React.FC<PaginationComponentProps> = ({
   const PreviousPageHandle = async () => {
     try {
       if (!cinemaApiResponse) return;
-      const response = await fetch(
-        `${apiUrl}/cinema?Keyword=${currentSearched}&PageNumber=${
+      const response = await apiClient.get(
+        `/cinema?Keyword=${currentSearched}&PageNumber=${
           cinemaApiResponse?.currentPage - 1
         }&OrderBy=id`
       );
-      const data = await response.json();
+      const data = response.data;
       setCinemaApiResponse(data);
       console.log(data);
     } catch (error) {
