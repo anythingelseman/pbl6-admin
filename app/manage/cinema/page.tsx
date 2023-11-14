@@ -20,7 +20,6 @@ import {
 } from "react-icons/hi";
 
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
-const apiUrl = process.env.API_URL;
 
 interface CinemaData {
   id?: number;
@@ -159,7 +158,7 @@ const AddCinemaModal = function () {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     apiClient
-      .post(`${apiUrl}/cinema`, JSON.stringify(formData))
+      .post(`/cinema`, JSON.stringify(formData))
       .then((response) => {
         console.log("Post request was successful:", response.data);
         location.reload();
@@ -214,48 +213,6 @@ const AddCinemaModal = function () {
   );
 };
 
-const ChangeNameModal = function () {
-  const [isOpen, setOpen] = useState(false);
-
-  return (
-    <>
-      <Button className="bg-sky-600" onClick={() => setOpen(!isOpen)}>
-        <HiPencilAlt className="mr-2 text-lg" />
-        Change name
-      </Button>
-      <Modal
-        onClose={() => {
-          setOpen(false);
-        }}
-        show={isOpen}
-      >
-        <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
-          <strong>Change name </strong>
-        </Modal.Header>
-        <Modal.Body>
-          <form>
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <div className="lg:col-span-2">
-                <Label htmlFor="productName">Name</Label>
-                <TextInput
-                  id="productName"
-                  name="productName"
-                  className="mt-1"
-                />
-              </div>
-            </div>
-          </form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button className="bg-sky-600" onClick={() => setOpen(false)}>
-            Save
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </>
-  );
-};
-
 const EditProductModal: React.FC<{
   data: CinemaData | undefined;
 }> = ({ data }) => {
@@ -279,7 +236,7 @@ const EditProductModal: React.FC<{
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     apiClient
-      .put(`${apiUrl}/cinema`, JSON.stringify(formData))
+      .put(`/cinema`, JSON.stringify(formData))
       .then((response) => {
         const result = response.data;
         console.log("Put request was successful:", result);

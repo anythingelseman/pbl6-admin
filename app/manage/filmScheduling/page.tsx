@@ -1,7 +1,6 @@
 "use client";
 
 import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
 import resourceTimelinePlugin from "@fullcalendar/resource-timeline";
 import interactionPlugin from "@fullcalendar/interaction";
 import {
@@ -14,7 +13,7 @@ import {
   Datepicker,
   Select,
 } from "flowbite-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FaPlus } from "react-icons/fa";
 import {
   HiOutlineExclamationCircle,
@@ -24,8 +23,178 @@ import {
 } from "react-icons/hi";
 
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
+import apiClient from "@/services/apiClient";
+import { EventSourceInput } from "@fullcalendar/core";
 
-export default function DashBoardPage() {
+interface FilmData {
+  id?: number;
+  name: string;
+  actor: string;
+  direct?: string;
+  director?: string;
+  producer?: string;
+  duration: number;
+  description: string;
+  year: number;
+  country: string;
+  limitAge: number;
+  trailer: string;
+  startDate: string; // This should be a valid date string format
+  endDate: string; // This should be a valid date string format
+  listIdCategory: number[];
+  category?: string;
+  fileImages: any;
+  image?: string;
+  createdOn?: string; // This should be a valid date string format
+  lastModifiedOn?: string; // This should be a valid date string format
+}
+
+interface FilmApiResponse {
+  messages: string[];
+  succeeded: boolean;
+  data: FilmData[];
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  pageSize: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
+interface CinemaData {
+  id?: number;
+  name: string | undefined;
+  description: string | undefined;
+  city: string | undefined;
+  createdOn?: string;
+  lastModifiedOn?: string;
+}
+
+interface CinemaApiResponse {
+  messages: string[];
+  succeeded: boolean;
+  data: CinemaData[];
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  pageSize: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
+
+interface ScheduleApiResponse {
+  data: ScheduleItem[];
+}
+
+interface ScheduleItem {
+  id?: number;
+  duration: number;
+  description: string;
+  startTime: string;
+  endTime?: string;
+  film?: string;
+  room?: string;
+  price: number;
+  filmId?: number;
+  roomId?: number;
+}
+
+interface RoomData {
+  id?: number;
+  name: string | undefined;
+  numberSeat: number | undefined;
+  status: number | undefined;
+  cinemaId: number | undefined;
+  createdOn?: string;
+  lastModifiedOn?: string;
+  numberRow?: number;
+  numberColumn?: number;
+}
+
+interface RoomApiResponse {
+  messages: string[];
+  succeeded: boolean;
+  data: RoomData[];
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  pageSize: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
+
+export default function SchedulingPage() {
+  const [cinemaApiResponse, setCinemaApiResponse] =
+    useState<CinemaApiResponse>();
+  const [scheduleApiResponse, setScheduleApiResponse] =
+    useState<ScheduleApiResponse>();
+  const [roomApiResponse, setRoomApiResponse] = useState<RoomApiResponse>();
+  const [filmApiResponse, setFilmApiResponse] = useState<FilmApiResponse>();
+  const [currentRooms, setCurrentRooms] = useState<RoomData[]>();
+  const [cinemaId, setCinemaId] = useState<number>(1);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await apiClient.get<FilmApiResponse | undefined>(
+        `/film?OrderBy=id`
+      );
+      setFilmApiResponse(response.data);
+      console.log(response.data);
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await apiClient.get(`/Room?OrderBy=id`);
+      const data = response.data;
+      setRoomApiResponse(data);
+      console.log(data);
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await apiClient.get<CinemaApiResponse | undefined>(
+        `/cinema?OrderBy=id`
+      );
+      const data = response.data;
+      setCinemaApiResponse(data);
+      console.log(data);
+    };
+    fetchData();
+  }, []);
+
+  function getRoomsByCinemaId(
+    rooms: RoomData[] | undefined,
+    targetCinemaId: number
+  ): RoomData[] | undefined {
+    return rooms?.filter((room) => room.cinemaId === targetCinemaId);
+  }
+
+  const changeHandle = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setCinemaId(Number(e.target.value));
+  };
+
+  const searchHandle = async () => {
+    try {
+      const response = await apiClient.get(`/schedule/cinema/${cinemaId}`);
+      const data = response.data;
+      setScheduleApiResponse(data);
+      setCurrentRooms(getRoomsByCinemaId(roomApiResponse?.data, cinemaId));
+      console.log(data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  function getCinemaNameById(cinemaId: number): string {
+    const foundCinema = cinemaApiResponse?.data?.find(
+      (cinema) => cinema.id === cinemaId
+    );
+    return foundCinema?.name || "";
+  }
+
   return (
     <>
       <div className="block items-center justify-between border-b border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800 sm:flex">
@@ -36,10 +205,29 @@ export default function DashBoardPage() {
             </h1>
           </div>
           <div className="block items-center sm:flex">
-            <SearchForProducts />
-
+            <div className="mb-4 sm:mb-0 sm:pr-3 ">
+              <Label htmlFor="search" className="sr-only">
+                Search
+              </Label>
+              <div className="relative mt-1 lg:w-64 xl:w-96 flex gap-x-3">
+                <Select name="cinemaId" required onChange={changeHandle}>
+                  {cinemaApiResponse?.data?.map((cinema) => (
+                    <option key={cinema.id} value={cinema.id}>
+                      {cinema.name}
+                    </option>
+                  ))}
+                </Select>
+                <Button className="bg-sky-600" onClick={searchHandle}>
+                  Search
+                </Button>
+              </div>
+            </div>
             <div className="flex w-full items-center sm:justify-end">
-              <AddProductModal />
+              <AddScheduleModal
+                filmApiResponse={filmApiResponse}
+                cinemaName={getCinemaNameById(cinemaId)}
+                currentRooms={currentRooms}
+              />
             </div>
           </div>
         </div>
@@ -48,259 +236,302 @@ export default function DashBoardPage() {
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden shadow">
-              <ProductsTable />
+              {scheduleApiResponse && (
+                <ScheduleTable
+                  scheduleApiResponse={scheduleApiResponse}
+                  currentRooms={currentRooms}
+                />
+              )}
             </div>
           </div>
         </div>
       </div>
-      <Pagination />
     </>
   );
 }
 
-const SearchForProducts = function () {
-  return (
-    <form className="mb-4 sm:mb-0 sm:pr-3" action="#" method="GET">
-      <Label htmlFor="products-search" className="sr-only">
-        Search
-      </Label>
-      <div className="relative mt-1 lg:w-64 xl:w-96">
-        <TextInput
-          id="products-search"
-          name="products-search"
-          placeholder="Search "
-        />
-      </div>
-    </form>
-  );
-};
-
-const AddProductModal = function () {
+const AddScheduleModal: React.FC<{
+  filmApiResponse: FilmApiResponse | undefined;
+  cinemaName: string;
+  currentRooms: RoomData[] | undefined;
+}> = ({ filmApiResponse, cinemaName, currentRooms }) => {
   const [isOpen, setOpen] = useState(false);
+  const [formData, setFormData] = useState<ScheduleItem>({
+    duration: 0,
+    description: "",
+    startTime: "",
+    filmId: 0,
+    roomId: 0,
+    price: 0,
+  });
 
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    let updatedValue;
+    if (name === "description") updatedValue = value;
+    else if (name === "startTime") updatedValue = value;
+    else updatedValue = Number(value);
+    setFormData({
+      ...formData,
+      [name]: updatedValue,
+    });
+    console.log(formData);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.filmId) throw new Error("Please select a film");
+    if (!formData.roomId) throw new Error("Please select a room");
+    apiClient
+      .post(`/schedule`, JSON.stringify(formData))
+      .then((response) => {
+        console.log("Post request was successful:", response.data);
+        location.reload();
+      })
+      .catch((error) => {
+        console.error("Error posting data:", error.messages);
+      });
+  };
   return (
     <>
       <Button className="bg-sky-600" onClick={() => setOpen(!isOpen)}>
         <FaPlus className="mr-3 text-sm" />
-        Add
+        Add cinema
       </Button>
-      <Modal onClose={() => setOpen(false)} show={isOpen}>
+      <Modal
+        onClose={() => {
+          setOpen(false);
+        }}
+        show={isOpen}
+      >
         <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
           <strong>Add </strong>
         </Modal.Header>
-        <Modal.Body>
-          <form>
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <div className="lg:col-span-2">
-                <Label htmlFor="">Film</Label>
-                <Select required>
-                  <option>Oppenheimer</option>
-                </Select>
-              </div>
-              <div className="lg:col-span-2">
-                <Label htmlFor="">Cinema</Label>
-                <Select required>
-                  <option>CGV Da Nang</option>
-                </Select>
-              </div>
-              <div className="lg:col-span-2">
-                <Label htmlFor="">Room</Label>
-                <Select required>
-                  <option>Room 1</option>
-                </Select>
-              </div>
-              <div className="lg:col-span-2">
-                <Label htmlFor="producTable.Celletails">Date</Label>
-                <Datepicker />
-              </div>
-
-              <div className="lg:col-span-2">
-                <Label htmlFor="producTable.Celletails">Select a time: </Label>
-                <input
-                  type="time"
-                  id="appt"
-                  name="appt"
-                  className="rounded bg-gray-50"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="price">Duration</Label>
-                <TextInput id="price" name="price" className="mt-1" />
-              </div>
-
-              <div>
-                <Label htmlFor="price">Price</Label>
-                <TextInput id="price" name="price" className="mt-1" />
-              </div>
+        <form onSubmit={handleSubmit} className="bg-white">
+          <Modal.Body>
+            <div className="mb-3">
+              <Label>Film</Label>
+              <Select name="filmId" onChange={handleChange} required>
+                <option selected value="">
+                  Select film
+                </option>
+                {filmApiResponse?.data.map((film) => (
+                  <option key={film.id} value={film.id}>
+                    {film.name}
+                  </option>
+                ))}
+              </Select>
             </div>
-          </form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button className="bg-sky-600" onClick={() => setOpen(false)}>
-            Add
-          </Button>
-        </Modal.Footer>
+            <div className="mb-3">
+              <Label>Duration</Label>
+              <TextInput
+                name="duration"
+                className="mt-1"
+                type="number"
+                onChange={handleChange}
+              />
+            </div>
+            <div className="mb-3">
+              <Label>Description</Label>
+              <TextInput
+                name="description"
+                className="mt-1"
+                onChange={handleChange}
+              />
+            </div>
+            <div className="mb-3">
+              <Label>Start time</Label>
+              <br />
+              <input
+                type="datetime-local"
+                onChange={handleChange}
+                className="rounded"
+                name="startTime"
+              />
+            </div>
+            <div className="mb-3">
+              <Label>Cinema</Label>
+              <TextInput className="mt-1" value={cinemaName} disabled />
+            </div>
+            <div className="mb-3">
+              <Label>Room</Label>
+              <Select name="roomId" onChange={handleChange} required>
+                <option selected value="">
+                  Select room
+                </option>
+                {currentRooms?.map((room) => (
+                  <option key={room.id} value={room.id}>
+                    {room.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div className="mb-3">
+              <Label>Price</Label>
+              <TextInput
+                name="price"
+                className="mt-1"
+                onChange={handleChange}
+                type="number"
+              />
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button className="bg-sky-600" type="submit">
+              Add
+            </Button>
+          </Modal.Footer>
+        </form>
       </Modal>
     </>
   );
 };
 
-const DeleteProductModal = function () {
-  const [isOpen, setOpen] = useState(false);
+const ScheduleTable: React.FC<{
+  scheduleApiResponse: ScheduleApiResponse | undefined;
+  currentRooms: RoomData[] | undefined;
+}> = ({ scheduleApiResponse, currentRooms }) => {
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedSchedule, setSelectedSchedule] = useState<ScheduleItem | null>(
+    null
+  );
+  const calendarRef = useRef(null);
+  const handleEventClick = (info: any) => {
+    setSelectedEvent(info.event);
+    console.log(info.event._def.publicId);
+    setSelectedSchedule(getScheduleById(Number(info.event._def.publicId)));
+  };
+  const resources = currentRooms?.map((room) => ({
+    id: room.id || 0,
+    title: room.name,
+  }));
 
+  const handleCloseModal = () => {
+    setSelectedEvent(null);
+    setSelectedSchedule(null);
+    console.log(selectedEvent);
+  };
+
+  function getRoomIdByName(
+    rooms: RoomData[] | undefined,
+    targetRoomName: string | undefined
+  ): number | null {
+    const foundRoom = rooms?.find((room) => room.name === targetRoomName);
+
+    // If a room with the specified name is found, return its ID; otherwise, return null
+    return foundRoom ? foundRoom.id || null : null;
+  }
+
+  function getScheduleById(scheduleId: number): ScheduleItem | null {
+    const foundSchedule = scheduleApiResponse?.data?.find(
+      (schedule) => schedule.id === scheduleId
+    );
+    return foundSchedule || null;
+  }
+
+  const events = scheduleApiResponse?.data.map((schedule) => ({
+    id: schedule.id,
+    title: schedule.film,
+    start: schedule.startTime,
+    end: schedule.endTime,
+    resourceId: getRoomIdByName(currentRooms, schedule.room),
+  }));
+
+  const handleChange = () => {};
   return (
     <>
-      <Button color="failure" onClick={() => setOpen(!isOpen)}>
-        <HiTrash className="mr-2 text-lg" />
-        Delete
-      </Button>
-      <Modal onClose={() => setOpen(false)} show={isOpen} size="md">
-        <Modal.Header className="px-3 pt-3 pb-0">
-          <span className="sr-only">Delete product</span>
+      <FullCalendar
+        schedulerLicenseKey="CC-Attribution-NonCommercial-NoDerivatives"
+        plugins={[resourceTimelinePlugin, interactionPlugin]}
+        ref={calendarRef}
+        eventClick={handleEventClick}
+        headerToolbar={{
+          left: "prev,next today",
+          center: "title",
+          right: "resourceTimelineDay",
+        }}
+        initialView="resourceTimelineDay"
+        nowIndicator={true}
+        editable={true}
+        selectable={true}
+        selectMirror={true}
+        events={events as EventSourceInput | undefined}
+        resourceAreaHeaderContent="Rooms"
+        //@ts-ignore
+        resources={resources}
+      />
+      <Modal show={!!selectedEvent} onClose={handleCloseModal}>
+        <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
+          <strong>Details</strong>
         </Modal.Header>
-        <Modal.Body className="px-6 pb-6 pt-0">
-          <div className="flex flex-col items-center gap-y-6 text-center">
-            <HiOutlineExclamationCircle className="text-7xl text-red-600" />
-            <p className="text-lg text-gray-500 dark:text-gray-300">
-              Are you sure you want to delete this?
-            </p>
-            <div className="flex items-center gap-x-3">
-              <Button color="failure" onClick={() => setOpen(false)}>
-                Yes, I'm sure
-              </Button>
-              <Button color="gray" onClick={() => setOpen(false)}>
-                No, cancel
-              </Button>
+        <form className="bg-white">
+          <Modal.Body>
+            <div>
+              <Label>Film</Label>
+              <TextInput
+                className="mt-1"
+                onChange={handleChange}
+                value={selectedSchedule?.film}
+                disabled
+              />
             </div>
-          </div>
-        </Modal.Body>
+            <div>
+              <Label>Duration</Label>
+              <TextInput
+                type="number"
+                className="mt-1"
+                onChange={handleChange}
+                value={selectedSchedule?.duration}
+                disabled
+              />
+            </div>
+            <div className="mt-3">
+              <Label htmlFor="price">Start time: </Label>
+              <br />
+              <input
+                type="datetime-local"
+                onChange={handleChange}
+                className="rounded"
+                value={selectedSchedule?.startTime}
+                disabled
+              />
+            </div>
+            <div className="mt-3">
+              <Label htmlFor="price">End time: </Label>
+              <br />
+              <input
+                type="datetime-local"
+                onChange={handleChange}
+                className="rounded"
+                value={selectedSchedule?.endTime}
+                disabled
+              />
+            </div>
+            <div className="mt-3">
+              <Label>Room</Label>
+              <TextInput
+                type="text"
+                className="mt-1"
+                onChange={handleChange}
+                value={selectedSchedule?.room}
+                disabled
+              />
+            </div>
+            <div className="mt-3">
+              <Label>Price</Label>
+              <TextInput
+                type="text"
+                className="mt-1"
+                onChange={handleChange}
+                value={selectedSchedule?.price}
+                disabled
+              />
+            </div>
+          </Modal.Body>
+        </form>
       </Modal>
     </>
-  );
-};
-
-const ProductsTable = function () {
-  return (
-    <FullCalendar
-      schedulerLicenseKey="CC-Attribution-NonCommercial-NoDerivatives"
-      plugins={[resourceTimelinePlugin, interactionPlugin]}
-      headerToolbar={{
-        left: "prev,next today",
-        center: "title",
-        right: "resourceTimelineDay,resourceTimelineWeek,resourceTimelineMonth",
-      }}
-      initialView="resourceTimelineDay"
-      nowIndicator={true}
-      editable={true}
-      selectable={true}
-      selectMirror={true}
-      resources={[
-        { id: "a", title: "Auditorium A" },
-        { id: "b", title: "Auditorium B", eventColor: "green" },
-        { id: "c", title: "Auditorium C", eventColor: "orange" },
-      ]}
-      events={[
-        {
-          title: "nice event",
-          start: new Date(),
-
-          resourceId: "a",
-        },
-        { title: "nice event", start: new Date(), resourceId: "b" },
-      ]}
-    />
-  );
-  // return (
-  //   <Table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
-  //     <Table.Head className="bg-gray-100 dark:bg-gray-700">
-  //       <Table.HeadCell>Film</Table.HeadCell>
-  //       <Table.HeadCell>Cinema</Table.HeadCell>
-  //       <Table.HeadCell>Room</Table.HeadCell>
-  //       <Table.HeadCell>Start time</Table.HeadCell>
-  //       <Table.HeadCell>Duration</Table.HeadCell>
-  //       <Table.HeadCell>Price</Table.HeadCell>
-  //       <Table.HeadCell>Action</Table.HeadCell>
-  //     </Table.Head>
-  //     <Table.Body className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-  //       <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-  //         <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-  //           <div className="text-base font-semibold text-gray-900 dark:text-white">
-  //             Oppenheimer
-  //           </div>
-  //           <div className="text-sm font-normal text-gray-500 dark:text-gray-400"></div>
-  //         </Table.Cell>
-  //         <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-  //           CGV Da Nang
-  //         </Table.Cell>
-  //         <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-  //           Room 1
-  //         </Table.Cell>
-  //         <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-  //           5:00PM 20/10/2023
-  //         </Table.Cell>
-  //         <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-  //           3h
-  //         </Table.Cell>
-  //         <Table.Cell className=" whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-  //           50,000 VND
-  //         </Table.Cell>
-  //         <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-  //           <div className="flex items-center gap-x-3">
-  //             <DeleteProductModal />
-  //           </div>
-  //         </Table.Cell>
-  //       </Table.Row>
-  //     </Table.Body>
-  //   </Table>
-  // );
-};
-
-export const Pagination = function () {
-  return (
-    <div className="sticky right-0 bottom-0 w-full items-center border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800 sm:flex sm:justify-between">
-      <div className="mb-4 flex items-center sm:mb-0">
-        <a
-          href="#"
-          className="inline-flex cursor-pointer justify-center rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-        >
-          <span className="sr-only">Previous page</span>
-          <HiChevronLeft className="text-2xl" />
-        </a>
-        <a
-          href="#"
-          className="mr-2 inline-flex cursor-pointer justify-center rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-        >
-          <span className="sr-only">Next page</span>
-          <HiChevronRight className="text-2xl" />
-        </a>
-        <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-          Showing&nbsp;
-          <span className="font-semibold text-gray-900 dark:text-white">
-            1-20
-          </span>
-          &nbsp;of&nbsp;
-          <span className="font-semibold text-gray-900 dark:text-white">
-            2290
-          </span>
-        </span>
-      </div>
-      <div className="flex items-center space-x-3">
-        <a
-          href="#"
-          className="inline-flex flex-1 items-center justify-center rounded-lg bg-primary-700 py-2 px-3 text-center text-sm font-medium text-white hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-        >
-          <HiChevronLeft className="mr-1 text-base" />
-          Previous
-        </a>
-        <a
-          href="#"
-          className="inline-flex flex-1 items-center justify-center rounded-lg bg-primary-700 py-2 px-3 text-center text-sm font-medium text-white hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-        >
-          Next
-          <HiChevronRight className="ml-1 text-base" />
-        </a>
-      </div>
-    </div>
   );
 };

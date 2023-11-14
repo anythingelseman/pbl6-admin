@@ -1,8 +1,24 @@
+"use client";
+import { useState, useEffect } from "react";
 import { Dropdown, Navbar, Avatar } from "flowbite-react";
 import Image from "next/image";
 import { PiFilmReelBold } from "react-icons/pi";
-
+import { UserAuthenticate } from "@/app/types/user";
+import { useRouter } from "next/navigation";
 export default function NavBar() {
+  const [user, setUser] = useState<any>();
+  const router = useRouter();
+  const getUser = () => {
+    setUser(JSON.parse(localStorage.getItem("USER") as any) || null);
+  };
+  useEffect(() => {
+    getUser();
+  }, [router]);
+
+  const logoutHandler = () => {
+    localStorage.removeItem("USER");
+    router.push("/login");
+  };
   return (
     <Navbar
       fluid
@@ -18,22 +34,18 @@ export default function NavBar() {
       <div className="flex md:order-2 text-white">
         <Dropdown
           inline
-          label={<h1>Hello, Quy</h1>}
+          label={<h1>Hello, {user?.employeeNo}</h1>}
           className="bg-slate-900 border-current"
         >
           <Dropdown.Header>
-            <span className="block text-sm text-white">Phan Phu Quy</span>
+            <span className="block text-sm text-white">{user?.email}</span>
             <span className="block truncate text-sm font-medium text-white">
-              quy@gmail.com
+              Role: {user?.role}
             </span>
           </Dropdown.Header>
-          <Dropdown.Item className="text-white">Details</Dropdown.Item>
-          <Dropdown.Item className="text-white" href="/manage/films">
-            Manage
+          <Dropdown.Item className="text-white" onClick={logoutHandler}>
+            Log out
           </Dropdown.Item>
-
-          <Dropdown.Divider />
-          <Dropdown.Item className="text-white">Sign out</Dropdown.Item>
         </Dropdown>
         <Navbar.Toggle />
       </div>

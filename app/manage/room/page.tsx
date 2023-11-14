@@ -30,6 +30,8 @@ interface RoomData {
   cinemaId: number | undefined;
   createdOn?: string;
   lastModifiedOn?: string;
+  numberRow?: number;
+  numberColumn?: number;
 }
 
 interface RoomApiResponse {
@@ -183,6 +185,8 @@ const AddRoomModal: React.FC<{
     numberSeat: 0,
     status: 0,
     cinemaId: 1,
+    numberRow: 0,
+    numberColumn: 0,
   });
 
   const handleChange = (
@@ -235,7 +239,7 @@ const AddRoomModal: React.FC<{
         <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
           <strong>Add </strong>
         </Modal.Header>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="bg-white">
           <Modal.Body>
             <div>
               <Label>Name</Label>
@@ -255,6 +259,24 @@ const AddRoomModal: React.FC<{
               <TextInput
                 type="number"
                 name="status"
+                className="mt-1"
+                onChange={handleChange}
+              />
+            </div>
+            <div className="mb-3">
+              <Label>Number of row</Label>
+              <TextInput
+                type="number"
+                name="numberRow"
+                className="mt-1"
+                onChange={handleChange}
+              />
+            </div>
+            <div className="mb-3">
+              <Label>Number of column</Label>
+              <TextInput
+                type="number"
+                name="numberColumn"
                 className="mt-1"
                 onChange={handleChange}
               />
@@ -295,6 +317,8 @@ const EditProductModal: React.FC<{
     numberSeat: data?.numberSeat,
     status: data?.status,
     cinemaId: data?.cinemaId,
+    numberRow: data?.numberRow,
+    numberColumn: data?.numberColumn,
   });
 
   const handleChange = (
@@ -342,7 +366,7 @@ const EditProductModal: React.FC<{
         <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
           <strong>Edit </strong>
         </Modal.Header>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="bg-white">
           <Modal.Body>
             <div>
               <Label>Name</Label>
@@ -371,6 +395,26 @@ const EditProductModal: React.FC<{
                 className="mt-1"
                 onChange={handleChange}
                 value={formData.status}
+              />
+            </div>
+            <div className="mb-3">
+              <Label>Number of row</Label>
+              <TextInput
+                type="number"
+                name="numberRow"
+                className="mt-1"
+                onChange={handleChange}
+                value={formData.numberRow}
+              />
+            </div>
+            <div className="mb-3">
+              <Label>Number of column</Label>
+              <TextInput
+                type="number"
+                name="numberColumn"
+                className="mt-1"
+                onChange={handleChange}
+                value={formData.numberColumn}
               />
             </div>
             <div>
@@ -477,6 +521,8 @@ const RoomTable: React.FC<{
         <Table.HeadCell>Number of seats</Table.HeadCell>
         <Table.HeadCell>Status</Table.HeadCell>
         <Table.HeadCell>Cinema</Table.HeadCell>
+        <Table.HeadCell>Row</Table.HeadCell>
+        <Table.HeadCell>Column</Table.HeadCell>
         <Table.HeadCell>Action</Table.HeadCell>
       </Table.Head>
       <Table.Body className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
@@ -515,6 +561,12 @@ const RoomRow: React.FC<{
       </Table.Cell>
       <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 ">
         {cinemaName}
+      </Table.Cell>
+      <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 ">
+        {data?.numberRow}
+      </Table.Cell>
+      <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 ">
+        {data?.numberColumn}
       </Table.Cell>
 
       <Table.Cell className="space-x-2 whitespace-nowrap p-4">

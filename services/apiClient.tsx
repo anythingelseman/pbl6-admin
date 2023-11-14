@@ -1,7 +1,12 @@
+import { UserAuthenticate } from "@/app/types/user";
+import globalRouter from "@/tools/globalRouter";
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
-
-import { useRouter } from "next/navigation";
-
+interface SessionService {
+  loggedInUser: UserAuthenticate | null;
+  isLoggedIn: boolean;
+  clearSession?: () => void;
+  saveSession: (userAuth: UserAuthenticate) => void;
+}
 const apiClient: AxiosInstance = axios.create({
   baseURL: "http://cinemawebapi.ddns.net:8001/api/v1",
   transformRequest: [],
@@ -13,23 +18,53 @@ const apiClient: AxiosInstance = axios.create({
     "Access-Control-Allow-Origin": "*",
   },
 });
-// // TODO / change temp token to access token when successful testing api
-// apiClient.interceptors.request.use(
-//     (config: InternalAxiosRequestConfig) => {
-//         const sessionService = useSessionService();
-//         const accessToken = sessionService.loggedInUser?.token;
 
-//         if (accessToken) {
-//             config.headers.Authorization = `Bearer ${accessToken}`;
-//         } else {
-//             globalRouter.navigate.push("/auth/login");
-//         }
+const useSessionService = (): SessionService => {
+  const loggedInUser: UserAuthenticate | null = (() => {
+    try {
+      const value = JSON.parse(localStorage.getItem("USER") || "false");
+      return value;
+    } catch (e) {
+      console.log(e);
+    }
+  })();
 
-//         return config;
-//     },
-//     (error) => {
-//         return Promise.reject(error);
-//     },
-// );
+  if (loggedInUser) {
+    localStorage.setItem("USER", JSON.stringify(loggedInUser));
+  } else {
+    localStorage.removeItem("USER");
+  }
+
+  const saveSession = (userAuth: UserAuthenticate): void => {
+    localStorage.setItem("USER", JSON.stringify(userAuth));
+  };
+
+  const isLoggedIn = !!loggedInUser;
+
+  return {
+    loggedInUser,
+    isLoggedIn,
+    saveSession,
+  };
+};
+
+// TODO / change temp token to access token when successful testing api
+apiClient.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    const sessionService = useSessionService();
+    const accessToken = sessionService.loggedInUser?.token;
+
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    } else {
+      globalRouter.navigate.push("/login");
+    }
+
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 export default apiClient;
