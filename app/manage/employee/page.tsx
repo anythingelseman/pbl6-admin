@@ -207,7 +207,7 @@ const DeleteProductModal = function () {
             </p>
             <div className="flex items-center gap-x-3">
               <Button color="failure" onClick={() => setOpen(false)}>
-                Yes, I'm sure
+                Yes, Im sure
               </Button>
               <Button color="gray" onClick={() => setOpen(false)}>
                 No, cancel

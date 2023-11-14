@@ -491,7 +491,7 @@ const DeleteProductModal: React.FC<{
             </p>
             <div className="flex items-center gap-x-3">
               <Button color="failure" onClick={deleteHandle}>
-                Yes, I'm sure
+                Yes, Im sure
               </Button>
               <Button color="gray" onClick={() => setOpen(false)}>
                 No, cancel
