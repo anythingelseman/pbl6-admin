@@ -1,5 +1,6 @@
 "use client";
 
+import apiClient from "@/services/apiClient";
 import {
   Button,
   Label,
@@ -84,8 +85,8 @@ export default function RoomPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch(`${apiUrl}/cinema?PageSize=100&OrderBy=id`);
-      const data = await response.json();
+      const response = await apiClient.get(`/cinema?PageSize=100&OrderBy=id`);
+      const data = response.data;
       setCinemaApiResponse(data);
       console.log(data);
     };
@@ -94,8 +95,8 @@ export default function RoomPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch(`${apiUrl}/Room?OrderBy=id`);
-      const data = await response.json();
+      const response = await apiClient.get(`/Room?OrderBy=id`);
+      const data = response.data;
       setRoomApiResponse(data);
       console.log(data);
     };
@@ -109,10 +110,10 @@ export default function RoomPage() {
   const searchHandle = async () => {
     try {
       setCurrentSearched(searchTerm);
-      const response = await fetch(
-        `${apiUrl}/Room?Keyword=${searchTerm}&OrderBy=id`
+      const response = await apiClient.get(
+        `/Room?Keyword=${searchTerm}&OrderBy=id`
       );
-      const data = await response.json();
+      const data = response.data;
       setRoomApiResponse(data);
       console.log(data);
     } catch (error) {
@@ -202,22 +203,12 @@ const AddRoomModal: React.FC<{
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    fetch(`${apiUrl}/Room`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    })
+    apiClient
+      .post(`/Room`, JSON.stringify(formData))
       .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((response) => {
-        const result = response.json();
+        const result = response.data;
         console.log("Post request was successful:", result);
+        location.reload();
       })
       .catch((error) => {
         toast.error("Error posting data", error);
@@ -286,6 +277,9 @@ const AddRoomModal: React.FC<{
                 <Label value="Select the cinema" />
               </div>
               <Select name="cinemaId" onChange={handleChange} required>
+                <option selected value="">
+                  Select cinema
+                </option>
                 {cinemaData?.map((cinema) => (
                   <option key={cinema.id} value={cinema.id}>
                     {cinema.name}
@@ -334,15 +328,10 @@ const EditProductModal: React.FC<{
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    fetch(`${apiUrl}/Room`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    })
+    apiClient
+      .put(`/Room`, JSON.stringify(formData))
       .then((response) => {
-        const result = response.json();
+        const result = response.data;
         console.log("Put request was successful:", result);
         location.reload();
       })
@@ -452,20 +441,16 @@ const DeleteProductModal: React.FC<{
   const [isOpen, setOpen] = useState(false);
   const deleteHandle = () => {
     setOpen(false);
-    fetch(`${apiUrl}/Room?Id=${roomId}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
+    apiClient
+      .delete(`/Room?Id=${roomId}`)
+      // .then((response) => {
+      //   if (!response.ok) {
+      //     throw new Error("Network response was not ok");
+      //   }
+      //   return response.json();
+      // })
       .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Delete request was successful:", data);
+        console.log("Delete request was successful:", response.data);
         location.reload();
       })
       .catch((error) => {
@@ -586,12 +571,12 @@ const Pagination: React.FC<PaginationComponentProps> = ({
   const NextPageHandle = async () => {
     try {
       if (!roomApiResponse) return;
-      const response = await fetch(
-        `${apiUrl}/Room?Keyword=${currentSearched}&PageNumber=${
+      const response = await apiClient.get(
+        `/Room?Keyword=${currentSearched}&PageNumber=${
           roomApiResponse?.currentPage + 1
         }&OrderBy=id`
       );
-      const data = await response.json();
+      const data = await response.data;
       setRoomApiResponse(data);
       console.log(data);
     } catch (error) {
@@ -602,12 +587,12 @@ const Pagination: React.FC<PaginationComponentProps> = ({
   const PreviousPageHandle = async () => {
     try {
       if (!roomApiResponse) return;
-      const response = await fetch(
-        `${apiUrl}/Room?Keyword=${currentSearched}&PageNumber=${
+      const response = await apiClient.get(
+        `/Room?Keyword=${currentSearched}&PageNumber=${
           roomApiResponse?.currentPage - 1
         }&OrderBy=id`
       );
-      const data = await response.json();
+      const data = await response.data;
       setRoomApiResponse(data);
       console.log(data);
     } catch (error) {

@@ -25,6 +25,7 @@ import {
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import apiClient from "@/services/apiClient";
 import { EventSourceInput } from "@fullcalendar/core";
+import toast from "react-hot-toast";
 
 interface FilmData {
   id?: number;
@@ -290,8 +291,8 @@ const AddScheduleModal: React.FC<{
         console.log("Post request was successful:", response.data);
         location.reload();
       })
-      .catch((error) => {
-        console.error("Error posting data:", error.messages);
+      .catch((error: any) => {
+        toast.error(error.response.data.messages[0]);
       });
   };
   return (
