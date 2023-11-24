@@ -44,6 +44,7 @@ interface FilmData {
   image?: string;
   createdOn?: string; // This should be a valid date string format
   lastModifiedOn?: string; // This should be a valid date string format
+  poster?: string;
 }
 
 interface FilmApiResponse {
@@ -208,6 +209,7 @@ const AddProductModal: React.FC<{
         typeFile: "",
       },
     ],
+    poster: "",
   });
 
   const handleChange = (

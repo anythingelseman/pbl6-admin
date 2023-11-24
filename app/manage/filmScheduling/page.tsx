@@ -298,7 +298,7 @@ const AddScheduleModal: React.FC<{
     <>
       <Button className="bg-sky-600" onClick={() => setOpen(!isOpen)}>
         <FaPlus className="mr-3 text-sm" />
-        Add cinema
+        Add schedule
       </Button>
       <Modal
         onClose={() => {
@@ -439,6 +439,25 @@ const ScheduleTable: React.FC<{
     resourceId: getRoomIdByName(currentRooms, schedule.room),
   }));
 
+  const deleteHandle = () => {
+    handleCloseModal();
+    apiClient
+      .delete(`/schedule?Id=${selectedSchedule?.id}`)
+      // .then((response) => {
+      //   if (!response.status ) {
+      //     throw new Error("Network response was not ok");
+      //   }
+      //   return response.data;
+      // })
+      .then((response) => {
+        console.log("Delete request was successful:", response.data);
+        location.reload();
+      })
+      .catch((error) => {
+        console.error("Error deleting data:", error);
+      });
+  };
+
   const handleChange = () => {};
   return (
     <>
@@ -528,6 +547,12 @@ const ScheduleTable: React.FC<{
                 value={selectedSchedule?.price}
                 disabled
               />
+            </div>
+            <div className="flex justify-center">
+              <Button color="failure" onClick={deleteHandle} className="mt-8">
+                <HiTrash className="mr-2 text-lg" />
+                Delete
+              </Button>
             </div>
           </Modal.Body>
         </form>

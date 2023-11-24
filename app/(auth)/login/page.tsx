@@ -30,7 +30,10 @@ export default function LoginPage() {
     console.log(formData);
     try {
       const response = await axios.post(
-        `http://cinemawebapi.ddns.net:8001/api/identity/token/`,
+        // `http://cinemawebapi.ddns.net:8001/api/identity/token/`,
+        // `http://192.168.124.47:8001/api/identity/token`,
+        `https://apideploy.azurewebsites.net/api/identity/token`,
+
         JSON.stringify(formData),
         {
           headers: {
@@ -47,8 +50,7 @@ export default function LoginPage() {
         router.push("/manage/films");
       }
     } catch (error: any) {
-      if (error instanceof Error) toast.error(error.message);
-      else toast.error(error.response.data.messages[0]);
+      toast.error(error.response.data.messages[0]);
     }
   };
 

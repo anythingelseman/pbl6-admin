@@ -17,12 +17,7 @@ export default function RootLayout({
   globalRouter.navigate = router;
   return (
     <html lang="en">
-      <head>
-        <meta
-          http-equiv="Content-Security-Policy"
-          content="upgrade-insecure-requests"
-        />
-      </head>
+      <head></head>
       <body className={`${inter.className} min-h-screen `}>
         <Toaster position="bottom-right" />
         {children}
