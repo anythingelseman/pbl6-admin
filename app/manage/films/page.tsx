@@ -21,6 +21,7 @@ import {
 } from "react-icons/hi";
 
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
+import toast from "react-hot-toast";
 
 const apiUrl = process.env.API_URL;
 interface FilmData {
@@ -170,7 +171,10 @@ export default function FilmsPage() {
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden shadow">
-              <FilmTable filmApiResponse={filmApiResponse} />
+              <FilmTable
+                filmApiResponse={filmApiResponse}
+                categoryData={CategoryApiResponse?.data}
+              />
             </div>
           </div>
         </div>
@@ -188,7 +192,7 @@ const AddProductModal: React.FC<{
   categoryData: CategoryData[] | undefined;
 }> = ({ categoryData }) => {
   const [isOpen, setOpen] = useState(false);
-  const [uploadImages, setUploadImages] = useState<any>();
+  const [uploadImages, setUploadImages] = useState<any>([]);
   const [formData, setFormData] = useState<FilmData>({
     name: "",
     actor: "",
@@ -225,11 +229,11 @@ const AddProductModal: React.FC<{
 
   const handleCheckboxChange = (categoryId: number) => {
     setFormData((prevState) => {
-      const isSelected = prevState.listIdCategory.includes(categoryId);
+      const isSelected = prevState.listIdCategory?.includes(categoryId);
       return {
         ...prevState,
         listIdCategory: isSelected
-          ? prevState.listIdCategory.filter((id) => id !== categoryId)
+          ? prevState.listIdCategory?.filter((id) => id !== categoryId)
           : [...prevState.listIdCategory, categoryId],
       };
     });
@@ -257,6 +261,20 @@ const AddProductModal: React.FC<{
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("hi");
+    if (uploadImages.length === 0) {
+      toast.error("Please select images.");
+      return;
+    }
+
+    if (formData.startDate === "" || formData.endDate === "") {
+      toast.error("Please select dates.");
+      return;
+    }
+    if (new Date(formData.startDate) > new Date(formData.endDate)) {
+      toast.error("End date is ealier than start date.");
+      return;
+    }
     setOpen(false);
 
     const uploadPromises = uploadImages.map(async (img: any) => {
@@ -491,92 +509,444 @@ const AddProductModal: React.FC<{
   );
 };
 
-const EditProductModal = function () {
+const EditProductModal: React.FC<{
+  filmId: number | undefined;
+  categoryData: CategoryData[] | undefined;
+}> = ({ filmId, categoryData }) => {
+  const getCategoryIds = (categoryNames: string | undefined): number[] => {
+    const namesArray = categoryNames?.split(",").map((name) => name.trim());
+
+    const categoryIds = namesArray?.map((name) => {
+      const category = categoryData?.find((c) => c.name === name);
+      return category ? category.id : null;
+    });
+
+    // Filter out null values (categories not found)
+    return categoryIds?.filter((id) => id !== null) as number[];
+  };
+  const [isEditImage, setIsEditImage] = useState<boolean>(false);
+  const [uploadImages, setUploadImages] = useState<any>([]);
+  const [apiImages, setApiImages] = useState<string[]>();
   const [isOpen, setOpen] = useState(false);
+  const [formData, setFormData] = useState<FilmData>({
+    name: "",
+    actor: "",
+    director: "",
+    producer: "",
+    duration: 0,
+    description: "",
+    year: 0,
+    country: "",
+    limitAge: 0,
+    trailer: "",
+    startDate: "",
+    endDate: "",
+    listIdCategory: [],
+    fileImages: [
+      {
+        nameFile: "",
+        typeFile: "",
+      },
+    ],
+    poster: "",
+  });
+
+  const fetchData = async () => {
+    const response = await apiClient.get(`/film/${filmId}`);
+    const data = await response.data.data;
+    setApiImages(data.image);
+
+    const transformedArray = data.image.map((link: string) => {
+      const parts = link.split("/");
+      const fileName = parts[parts.length - 1];
+
+      return {
+        nameFile: fileName,
+        typeFile: "Image",
+      };
+    });
+
+    setFormData({
+      id: data.id,
+      name: data.name,
+      actor: data.actor,
+      director: data.director,
+      producer: data.producer,
+      duration: data.duration,
+      description: data.description,
+      year: data.year,
+      country: data.country,
+      limitAge: data.limitAge,
+      trailer: data.trailer,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      listIdCategory: getCategoryIds(data.category),
+      fileImages: transformedArray,
+      poster: "",
+    });
+    console.log(formData);
+  };
+
+  const handleCheckboxChange = (categoryId: number) => {
+    setFormData((prevState) => {
+      const isSelected = prevState.listIdCategory?.includes(categoryId);
+      return {
+        ...prevState,
+        listIdCategory: isSelected
+          ? prevState.listIdCategory?.filter((id) => id !== categoryId)
+          : [...prevState.listIdCategory, categoryId],
+      };
+    });
+    console.log(formData);
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+    console.log(formData);
+  };
+
+  const customAfter = (event: any) => {
+    const file = event.target.files[0];
+    file.objectURL = URL.createObjectURL(event.target.files[0]);
+    console.log(file);
+    if (
+      uploadImages?.filter((e: any) => {
+        return e.name == file.name;
+      }).length
+    ) {
+      console.log("already add img");
+    } else {
+      setUploadImages([
+        ...(uploadImages == undefined ? [] : uploadImages),
+        file,
+      ]);
+      console.log("uploadImages" + uploadImages);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.startDate === "" || formData.endDate === "") {
+      toast.error("Please select dates");
+      return;
+    }
+    if (new Date(formData.startDate) > new Date(formData.endDate)) {
+      toast.error("End date is ealier than start date.");
+      return;
+    }
+    if (isEditImage) {
+      if (uploadImages.length == 0) {
+        toast.error("Please select images");
+        return;
+      }
+
+      const startDate = new Date(formData.startDate);
+      const uploadPromises = uploadImages.map(async (img: any) => {
+        const image = new FormData();
+        image.append("filePath", img.name);
+        image.append("file", img);
+        console.log("formData" + image.get("filePath"));
+
+        const response = await apiClient.post(`/upload`, image);
+
+        const result = await response.data;
+        console.log(result);
+        return {
+          nameFile: result.data.filePath,
+          typeFile: "Image",
+        };
+      });
+
+      Promise.all(uploadPromises)
+        .then(async (uploadedImages) => {
+          const response = await apiClient.put(
+            `/film`,
+            JSON.stringify({ ...formData, fileImages: uploadedImages })
+          );
+
+          console.log("Data film put successfully:", response.data);
+          return response.data;
+        })
+        .then((result) => {
+          location.reload();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      apiClient
+        .put(`/film`, JSON.stringify(formData))
+        .then((response) => {
+          console.log("Put request was successful:", response.data);
+          location.reload();
+        })
+        .catch((error) => {
+          console.error("Error posting data:", error);
+        });
+    }
+  };
 
   return (
     <>
-      <Button className="bg-sky-600" onClick={() => setOpen(!isOpen)}>
+      <Button
+        className="bg-sky-600"
+        onClick={() => {
+          setOpen(!isOpen);
+          fetchData();
+        }}
+      >
         <HiPencilAlt className="mr-2 text-lg" />
         Edit
       </Button>
-      <Modal onClose={() => setOpen(false)} show={isOpen}>
+      <Modal
+        onClose={() => {
+          setOpen(false);
+        }}
+        show={isOpen}
+      >
         <Modal.Header className="border-b border-gray-200 !p-6 ">
           <strong>Edit film</strong>
         </Modal.Header>
-        <Modal.Body>
-          <form>
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <div>
-                <Label htmlFor="productName">Name</Label>
-                <TextInput
-                  id="productName"
-                  name="productName"
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="category">Actor</Label>
-                <TextInput id="category" name="category" className="mt-1" />
-              </div>
-              <div>
-                <Label htmlFor="brand">Director</Label>
-                <TextInput id="brand" name="brand" className="mt-1" />
-              </div>
-              <div>
-                <Label htmlFor="price">Duration</Label>
-                <TextInput id="price" name="price" className="mt-1" />
-              </div>
-              <div className="lg:col-span-2">
-                <Label htmlFor="producTable.Celletails">Description</Label>
-                <Textarea
-                  id="producTable.Celletails"
-                  name="producTable.Celletails"
-                  rows={6}
-                  className="mt-1"
-                />
-                \
-              </div>
-              <div className="lg:col-span-2">
-                <Label htmlFor="producTable.Celletails">Trailer</Label>
-                <TextInput
-                  id="producTable.Celletails"
-                  name="producTable.Celletails"
-                  className="mt-1"
-                />
-              </div>
-              <div className="lg:col-span-2">
-                <Label htmlFor="producTable.Celletails">Year</Label>
-                <TextInput
-                  id="producTable.Celletails"
-                  name="producTable.Celletails"
-                  className="mt-1"
-                />
-              </div>
-              <div className="lg:col-span-2">
-                <div className="flex w-full items-center justify-center">
-                  <label className="flex h-32 w-full cursor-pointer flex-col rounded border-2 border-dashed border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-700">
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <HiUpload className="text-4xl text-gray-300" />
-                      <p className="py-1 text-sm text-gray-600 dark:text-gray-500">
-                        Upload an image or drag and drop
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        PNG, JPG, GIF up to 10MB
-                      </p>
-                    </div>
-                    <input type="file" className="hidden" />
-                  </label>
+        {formData.name && (
+          <form onSubmit={handleSubmit} className="bg-white">
+            <Modal.Body>
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <div>
+                  <Label>Name</Label>
+                  <TextInput
+                    name="name"
+                    className="mt-1"
+                    onChange={handleChange}
+                    value={formData.name}
+                  />
                 </div>
+                <div>
+                  <Label>Actor</Label>
+                  <TextInput
+                    name="actor"
+                    className="mt-1"
+                    onChange={handleChange}
+                    value={formData.actor}
+                  />
+                </div>
+                <div>
+                  <Label>Director</Label>
+                  <TextInput
+                    name="director"
+                    className="mt-1"
+                    onChange={handleChange}
+                    value={formData.director}
+                  />
+                </div>
+                <div>
+                  <Label>Producer</Label>
+                  <TextInput
+                    name="producer"
+                    className="mt-1"
+                    onChange={handleChange}
+                    value={formData.producer}
+                  />
+                </div>
+                <div>
+                  <Label>Duration</Label>
+                  <TextInput
+                    type="number"
+                    name="duration"
+                    className="mt-1"
+                    onChange={handleChange}
+                    value={formData.duration}
+                  />
+                </div>
+
+                <div>
+                  <Label>Country</Label>
+                  <TextInput
+                    name="country"
+                    className="mt-1"
+                    onChange={handleChange}
+                    value={formData.country}
+                  />
+                </div>
+
+                <div>
+                  <Label>Year</Label>
+                  <TextInput
+                    type="number"
+                    name="year"
+                    className="mt-1"
+                    onChange={handleChange}
+                    value={formData.year}
+                  />
+                </div>
+
+                <div>
+                  <Label>Age limit</Label>
+                  <TextInput
+                    type="number"
+                    name="limitAge"
+                    className="mt-1"
+                    onChange={handleChange}
+                    value={formData.limitAge}
+                  />
+                </div>
+
+                <div>
+                  <Label>Start date: </Label>
+                  <input
+                    type="date"
+                    name="startDate"
+                    onChange={handleChange}
+                    className="rounded"
+                    value={
+                      new Date(formData.startDate).toISOString().split("T")[0]
+                    }
+                  />
+                </div>
+
+                <div>
+                  <Label>End date: </Label>
+                  <input
+                    type="date"
+                    name="endDate"
+                    onChange={handleChange}
+                    className="rounded"
+                    value={
+                      new Date(formData.endDate).toISOString().split("T")[0]
+                    }
+                  />
+                </div>
+
+                <div className="lg:col-span-2">
+                  <Label>Category</Label>
+                </div>
+
+                {categoryData &&
+                  categoryData.map((data) => (
+                    <div key={data.id}>
+                      <Checkbox
+                        className="mx-3"
+                        name="listIdCategory"
+                        id={data.id.toString()}
+                        onChange={() => handleCheckboxChange(data.id)}
+                        checked={formData.listIdCategory.includes(data.id)}
+                      />
+                      <Label htmlFor={data.id.toString()}>{data.name}</Label>
+                    </div>
+                  ))}
+
+                <div className="lg:col-span-2">
+                  <Label>Description</Label>
+                  <Textarea
+                    name="description"
+                    rows={6}
+                    className="mt-1"
+                    onChange={handleChange}
+                    value={formData.description}
+                  />
+                </div>
+                <div className="lg:col-span-2">
+                  <Label>Trailer</Label>
+                  <TextInput
+                    onChange={handleChange}
+                    name="trailer"
+                    className="mt-1"
+                    value={formData.trailer}
+                  />
+                </div>
+
+                {!isEditImage && (
+                  <div className="lg:col-span-2">
+                    <Label className="mb-5">Image</Label>
+                    <div className="flex gap-x-3">
+                      {apiImages?.map((imageLink, index) => (
+                        <img
+                          key={index}
+                          src={imageLink}
+                          alt={`Image ${index + 1}`}
+                          width={150}
+                          height={100}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {!isEditImage && (
+                  <Button
+                    className="bg-sky-600"
+                    onClick={() => setIsEditImage(true)}
+                  >
+                    <HiPencilAlt className="mr-2 text-lg" />
+                    Edit image
+                  </Button>
+                )}
+
+                {isEditImage && (
+                  <div className="lg:col-span-2">
+                    <div className="flex w-full items-center justify-center">
+                      <label className="flex h-32 w-full cursor-pointer flex-col rounded border-2 border-dashed border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-700">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <HiUpload className="text-4xl text-gray-300" />
+                          <p className="py-1 text-sm text-gray-600 dark:text-gray-500">
+                            Upload an image or drag and drop
+                          </p>
+                        </div>
+                        <input
+                          type="file"
+                          className="hidden"
+                          multiple
+                          accept="image/*"
+                          onChange={customAfter}
+                        />
+                      </label>
+                    </div>
+
+                    <div className="flex">
+                      {uploadImages?.map(
+                        (img: any, index: React.Key | null | undefined) => {
+                          return (
+                            <div className="img-wrap" key={index}>
+                              <img
+                                src={img.objectURL}
+                                height={100}
+                                width={150}
+                              />
+                              <span
+                                className=""
+                                onClick={(e) => {
+                                  let images = uploadImages.filter(
+                                    (el: any) => {
+                                      if (el.name !== img.name) return el;
+                                    }
+                                  );
+                                  setUploadImages([...images]);
+                                }}
+                              >
+                                &times;
+                              </span>
+                            </div>
+                          );
+                        }
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
+            </Modal.Body>
+
+            <Modal.Footer>
+              <Button className="bg-sky-600" type="submit">
+                Edit
+              </Button>
+            </Modal.Footer>
           </form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button className="bg-sky-600" onClick={() => setOpen(false)}>
-            Save all
-          </Button>
-        </Modal.Footer>
+        )}
       </Modal>
     </>
   );
@@ -638,7 +1008,8 @@ const DeleteProductModal: React.FC<{
 
 const FilmTable: React.FC<{
   filmApiResponse: FilmApiResponse | undefined;
-}> = ({ filmApiResponse }) => {
+  categoryData: CategoryData[] | undefined;
+}> = ({ filmApiResponse, categoryData }) => {
   return (
     <Table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
       <Table.Head className="bg-gray-100 dark:bg-gray-700">
@@ -646,7 +1017,7 @@ const FilmTable: React.FC<{
         <Table.HeadCell>Actor</Table.HeadCell>
         <Table.HeadCell>Director</Table.HeadCell>
         <Table.HeadCell>Duration</Table.HeadCell>
-        <Table.HeadCell>Description</Table.HeadCell>
+        {/* <Table.HeadCell>Description</Table.HeadCell> */}
         <Table.HeadCell>Year</Table.HeadCell>
         <Table.HeadCell>Country</Table.HeadCell>
         <Table.HeadCell>Age limit</Table.HeadCell>
@@ -660,14 +1031,17 @@ const FilmTable: React.FC<{
       <Table.Body className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
         {filmApiResponse?.data &&
           filmApiResponse.data.map((data) => (
-            <FilmRow data={data} key={data.id} />
+            <FilmRow data={data} key={data.id} categoryData={categoryData} />
           ))}
       </Table.Body>
     </Table>
   );
 };
 
-const FilmRow: React.FC<{ data: FilmData | undefined }> = ({ data }) => {
+const FilmRow: React.FC<{
+  data: FilmData | undefined;
+  categoryData: CategoryData[] | undefined;
+}> = ({ data, categoryData }) => {
   const formatDate = (date: string) => {
     const dateObject = new Date(date);
 
@@ -698,11 +1072,11 @@ const FilmRow: React.FC<{ data: FilmData | undefined }> = ({ data }) => {
       <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 ">
         {data?.duration}
       </Table.Cell>
-      <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 ">
+      {/* <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 ">
         <div className="w-[200px] overflow-hidden text-ellipsis whitespace-pre-line">
           {data?.description}
         </div>
-      </Table.Cell>
+      </Table.Cell> */}
       <Table.Cell className=" whitespace-nowrap p-4 text-base font-medium text-gray-900 ">
         {data?.year}
       </Table.Cell>
@@ -729,7 +1103,7 @@ const FilmRow: React.FC<{ data: FilmData | undefined }> = ({ data }) => {
       </Table.Cell>
       <Table.Cell className="space-x-2 whitespace-nowrap p-4">
         <div className="flex items-center gap-x-3">
-          {/* <EditProductModal /> */}
+          <EditProductModal filmId={data?.id} categoryData={categoryData} />
           <DeleteProductModal filmId={data?.id} />
         </div>
       </Table.Cell>
