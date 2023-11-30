@@ -1,8 +1,16 @@
 "use client";
 
 import apiClient from "@/services/apiClient";
-import { Button, Label, Modal, Table, TextInput } from "flowbite-react";
+import {
+  Button,
+  Label,
+  Modal,
+  Spinner,
+  Table,
+  TextInput,
+} from "flowbite-react";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { FaPlus } from "react-icons/fa";
 
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
@@ -40,15 +48,24 @@ export default function CategoryPage() {
   const [categoryData, setCategoryData] = useState<ApiResponse>();
   const [searchTerm, setSearchTerm] = useState("");
   const [currentSearched, setCurrentSearched] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [refetchTrigger, setRefetchTrigger] = useState(false);
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       const response = await apiClient.get(`/category?OrderBy=id`);
       const data = response.data;
       setCategoryData(data);
-      console.log(data);
+      setIsLoading(false);
+      setCurrentSearched("");
+      setSearchTerm("");
     };
     fetchData();
-  }, []);
+  }, [refetchTrigger]);
+
+  const handleRefetch = () => {
+    setRefetchTrigger((prev) => !prev);
+  };
 
   const changeHandle = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -67,6 +84,13 @@ export default function CategoryPage() {
       console.error("Error fetching data:", error);
     }
   };
+
+  if (isLoading)
+    return (
+      <div className="flex justify-center content-center min-h-screen">
+        <Spinner className="mt-60" />
+      </div>
+    );
 
   return (
     <>
@@ -98,7 +122,7 @@ export default function CategoryPage() {
             </div>
 
             <div className="flex w-full items-center sm:justify-end">
-              <AddProductModal />
+              <AddProductModal handleRefetch={handleRefetch} />
             </div>
           </div>
         </div>
@@ -121,7 +145,9 @@ export default function CategoryPage() {
   );
 }
 
-const AddProductModal = function () {
+const AddProductModal: React.FC<{
+  handleRefetch: () => void;
+}> = ({ handleRefetch }) => {
   const [isOpen, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -137,18 +163,29 @@ const AddProductModal = function () {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (
+      Object.values(formData).some(
+        (value) =>
+          (typeof value === "string" && value.trim() === "") ||
+          value === null ||
+          value === undefined
+      )
+    ) {
+      toast.error("Please fill in all the fields");
+      return;
+    }
     console.log(formData);
-    setOpen(false);
+
     try {
       const response = await apiClient.post(
         `${apiUrl}/category`,
         JSON.stringify(formData)
       );
-      const result = response.data;
-      console.log("Data posted successfully:", result);
-      location.reload();
-    } catch (error) {
-      console.error("Error posting data:", error);
+      setOpen(false);
+      setFormData({ name: "" });
+      handleRefetch();
+    } catch (error: any) {
+      toast.error(error);
     }
   };
 

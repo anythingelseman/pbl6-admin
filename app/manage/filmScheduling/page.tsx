@@ -246,6 +246,7 @@ export default function SchedulingPage() {
               )}
               {scheduleApiResponse && !isFetchingSchedule && (
                 <ScheduleTable
+                  refetchHandle={searchHandle}
                   scheduleApiResponse={scheduleApiResponse}
                   currentRooms={currentRooms}
                 />
@@ -419,7 +420,8 @@ const AddScheduleModal: React.FC<{
 const ScheduleTable: React.FC<{
   scheduleApiResponse: ScheduleApiResponse | undefined;
   currentRooms: RoomData[] | undefined;
-}> = ({ scheduleApiResponse, currentRooms }) => {
+  refetchHandle: () => void;
+}> = ({ scheduleApiResponse, currentRooms, refetchHandle }) => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedSchedule, setSelectedSchedule] = useState<ScheduleItem | null>(
     null
@@ -470,18 +472,12 @@ const ScheduleTable: React.FC<{
     handleCloseModal();
     apiClient
       .delete(`/schedule?Id=${selectedSchedule?.id}`)
-      // .then((response) => {
-      //   if (!response.status ) {
-      //     throw new Error("Network response was not ok");
-      //   }
-      //   return response.data;
-      // })
       .then((response) => {
-        console.log("Delete request was successful:", response.data);
-        location.reload();
+        refetchHandle();
+        toast.success("Delete room successfully");
       })
       .catch((error) => {
-        console.error("Error deleting data:", error);
+        toast.error(error);
       });
   };
 

@@ -423,7 +423,7 @@ const AddProductModal: React.FC<{
               </div>
 
               <div>
-                <Label htmlFor="price">Start date: </Label>
+                <Label>Start date: </Label>
                 <input
                   type="date"
                   name="startDate"

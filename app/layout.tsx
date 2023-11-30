@@ -19,7 +19,12 @@ export default function RootLayout({
     <html lang="en">
       <head></head>
       <body className={`${inter.className} min-h-screen `}>
-        <Toaster position="bottom-right" />
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            duration: 5000,
+          }}
+        />
         {children}
       </body>
     </html>
