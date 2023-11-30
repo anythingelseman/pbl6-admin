@@ -20,7 +20,7 @@ export default function RootLayout({
       <NavBar />
       <div className="flex items-start">
         <SideBar />
-        <main className="relative min-h-screen w-full overflow-y-auto bg-gray-50 dark:bg-gray-900 lg:ml-64">
+        <main className="relative min-h-screen w-full overflow-y-auto bg-gray-50 lg:ml-64">
           {children}
         </main>
       </div>

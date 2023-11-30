@@ -42,11 +42,14 @@ export default function LoginPage() {
         }
       );
       const result = response.data;
-      if (result.data.role === "Customer")
-        throw new Error("You are not an admin");
+      if (result.data.role === "Customer") {
+        toast.error("You are only a customer");
+        return;
+      }
 
       if (result.succeeded == true) {
         localStorage.setItem("USER", JSON.stringify(result.data));
+        toast.success("Log in successfully");
         router.push("/manage/films");
       }
     } catch (error: any) {

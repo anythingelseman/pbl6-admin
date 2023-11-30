@@ -10,6 +10,7 @@ import {
   TextInput,
   Datepicker,
   Select,
+  Spinner,
 } from "flowbite-react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
@@ -82,26 +83,28 @@ export default function RoomPage() {
   const [roomApiResponse, setRoomApiResponse] = useState<RoomApiResponse>();
   const [searchTerm, setSearchTerm] = useState("");
   const [currentSearched, setCurrentSearched] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [refetchTrigger, setRefetchTrigger] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await apiClient.get(`/cinema?PageSize=100&OrderBy=id`);
-      const data = response.data;
-      setCinemaApiResponse(data);
-      console.log(data);
+      setIsLoading(true);
+      const response1 = await apiClient.get(`/cinema?PageSize=100&OrderBy=id`);
+      const data1 = response1.data;
+      setCinemaApiResponse(data1);
+      const response2 = await apiClient.get(`/Room?OrderBy=id`);
+      const data2 = response2.data;
+      setRoomApiResponse(data2);
+      setIsLoading(false);
+      setCurrentSearched("");
+      setSearchTerm("");
     };
     fetchData();
-  }, []);
+  }, [refetchTrigger]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await apiClient.get(`/Room?OrderBy=id`);
-      const data = response.data;
-      setRoomApiResponse(data);
-      console.log(data);
-    };
-    fetchData();
-  }, []);
+  const handleRefetch = () => {
+    setRefetchTrigger((prev) => !prev);
+  };
 
   const changeHandle = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -120,6 +123,13 @@ export default function RoomPage() {
       console.error("Error fetching data:", error);
     }
   };
+
+  if (isLoading)
+    return (
+      <div className="flex justify-center content-center min-h-screen">
+        <Spinner className="mt-60" />
+      </div>
+    );
 
   return (
     <>
@@ -151,7 +161,10 @@ export default function RoomPage() {
             </div>
 
             <div className="flex w-full items-center sm:justify-end gap-x-3">
-              <AddRoomModal cinemaData={cinemaApiResponse?.data} />
+              <AddRoomModal
+                cinemaData={cinemaApiResponse?.data}
+                handleRefetch={handleRefetch}
+              />
             </div>
           </div>
         </div>
@@ -163,6 +176,7 @@ export default function RoomPage() {
               <RoomTable
                 cinemaApiResponse={cinemaApiResponse}
                 roomApiResponse={roomApiResponse}
+                handleRefetch={handleRefetch}
               />
             </div>
           </div>
@@ -179,7 +193,8 @@ export default function RoomPage() {
 
 const AddRoomModal: React.FC<{
   cinemaData: CinemaData[] | undefined;
-}> = ({ cinemaData }) => {
+  handleRefetch: () => void;
+}> = ({ cinemaData, handleRefetch }) => {
   const [isOpen, setOpen] = useState(false);
   const [formData, setFormData] = useState<RoomData>({
     name: "",
@@ -203,15 +218,34 @@ const AddRoomModal: React.FC<{
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (
+      Object.values(formData).some(
+        (value) =>
+          (typeof value === "string" && value.trim() === "") ||
+          value === null ||
+          value === undefined
+      )
+    ) {
+      toast.error("Please fill in all the fields");
+      return;
+    }
     apiClient
       .post(`/Room`, JSON.stringify(formData))
       .then((response) => {
-        const result = response.data;
-        console.log("Post request was successful:", result);
-        location.reload();
+        handleRefetch();
+        setOpen(false);
+        setFormData({
+          name: "",
+          numberSeat: 0,
+          status: 0,
+          cinemaId: 1,
+          numberRow: 0,
+          numberColumn: 0,
+        });
+        toast.success("Add room successfully");
       })
       .catch((error) => {
-        toast.error("Error posting data", error);
+        toast.error(error);
       });
   };
 
@@ -302,7 +336,8 @@ const AddRoomModal: React.FC<{
 const EditProductModal: React.FC<{
   data: RoomData | undefined;
   cinemaData: CinemaData[] | undefined;
-}> = ({ data, cinemaData }) => {
+  handleRefetch: () => void;
+}> = ({ data, cinemaData, handleRefetch }) => {
   const [isOpen, setOpen] = useState(false);
 
   const [formData, setFormData] = useState<RoomData>({
@@ -328,15 +363,26 @@ const EditProductModal: React.FC<{
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (
+      Object.values(formData).some(
+        (value) =>
+          (typeof value === "string" && value.trim() === "") ||
+          value === null ||
+          value === undefined
+      )
+    ) {
+      toast.error("Please fill in all the fields");
+      return;
+    }
     apiClient
       .put(`/Room`, JSON.stringify(formData))
       .then((response) => {
-        const result = response.data;
-        console.log("Put request was successful:", result);
-        location.reload();
+        setOpen(false);
+        handleRefetch();
+        toast.success("Edit room successfully");
       })
       .catch((error) => {
-        console.error("Error putting data:", error);
+        toast.error(error);
       });
   };
 
@@ -437,24 +483,19 @@ const EditProductModal: React.FC<{
 
 const DeleteProductModal: React.FC<{
   roomId: number | undefined;
-}> = ({ roomId }) => {
+  handleRefetch: () => void;
+}> = ({ roomId, handleRefetch }) => {
   const [isOpen, setOpen] = useState(false);
   const deleteHandle = () => {
     setOpen(false);
     apiClient
       .delete(`/Room?Id=${roomId}`)
-      // .then((response) => {
-      //   if (!response.ok) {
-      //     throw new Error("Network response was not ok");
-      //   }
-      //   return response.json();
-      // })
       .then((response) => {
-        console.log("Delete request was successful:", response.data);
-        location.reload();
+        handleRefetch();
+        toast.success("Delete room successfully");
       })
       .catch((error) => {
-        console.error("Error deleting data:", error);
+        toast.error(error);
       });
   };
 
@@ -492,7 +533,8 @@ const DeleteProductModal: React.FC<{
 const RoomTable: React.FC<{
   cinemaApiResponse: CinemaApiResponse | undefined;
   roomApiResponse: RoomApiResponse | undefined;
-}> = ({ cinemaApiResponse, roomApiResponse }) => {
+  handleRefetch: () => void;
+}> = ({ cinemaApiResponse, roomApiResponse, handleRefetch }) => {
   const getCinemaNameById = (id: number | undefined): string | null => {
     const cinemaData = cinemaApiResponse?.data.find((c) => c.id === id);
     if (!cinemaData) return null;
@@ -518,6 +560,7 @@ const RoomTable: React.FC<{
               key={data.id}
               cinemaName={getCinemaNameById(data?.cinemaId)}
               cinemaData={cinemaApiResponse?.data}
+              handleRefetch={handleRefetch}
             />
           ))}
       </Table.Body>
@@ -529,7 +572,8 @@ const RoomRow: React.FC<{
   data: RoomData | undefined;
   cinemaName: string | null;
   cinemaData: CinemaData[] | undefined;
-}> = ({ data, cinemaName, cinemaData }) => {
+  handleRefetch: () => void;
+}> = ({ data, cinemaName, cinemaData, handleRefetch }) => {
   return (
     <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
       <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
@@ -556,8 +600,12 @@ const RoomRow: React.FC<{
 
       <Table.Cell className="space-x-2 whitespace-nowrap p-4">
         <div className="flex items-center gap-x-3">
-          <EditProductModal data={data} cinemaData={cinemaData} />
-          <DeleteProductModal roomId={data?.id} />
+          <EditProductModal
+            data={data}
+            cinemaData={cinemaData}
+            handleRefetch={handleRefetch}
+          />
+          <DeleteProductModal roomId={data?.id} handleRefetch={handleRefetch} />
         </div>
       </Table.Cell>
     </Table.Row>

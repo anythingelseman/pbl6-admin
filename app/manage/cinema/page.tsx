@@ -1,6 +1,7 @@
 "use client";
 
 import apiClient from "@/services/apiClient";
+import globalRouter from "@/tools/globalRouter";
 import {
   Button,
   Label,
@@ -10,8 +11,10 @@ import {
   TextInput,
   Datepicker,
   Select,
+  Spinner,
 } from "flowbite-react";
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import { FaPlus } from "react-icons/fa";
 import {
   HiOutlineExclamationCircle,
@@ -55,18 +58,27 @@ export default function CinemaPage() {
     useState<CinemaApiResponse>();
   const [searchTerm, setSearchTerm] = useState("");
   const [currentSearched, setCurrentSearched] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [refetchTrigger, setRefetchTrigger] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       const response = await apiClient.get<CinemaApiResponse | undefined>(
         `/cinema?OrderBy=id`
       );
       const data = response.data;
       setCinemaApiResponse(data);
-      console.log(data);
+      setIsLoading(false);
+      setCurrentSearched("");
+      setSearchTerm("");
     };
     fetchData();
-  }, []);
+  }, [refetchTrigger]);
+
+  const handleRefetch = () => {
+    setRefetchTrigger((prev) => !prev);
+  };
 
   const changeHandle = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -80,11 +92,17 @@ export default function CinemaPage() {
       );
       const data = response.data;
       setCinemaApiResponse(data);
-      console.log(data);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
+
+  if (isLoading)
+    return (
+      <div className="flex justify-center content-center min-h-screen">
+        <Spinner className="mt-60" />
+      </div>
+    );
 
   return (
     <>
@@ -116,7 +134,7 @@ export default function CinemaPage() {
             </div>
 
             <div className="flex w-full items-center sm:justify-end gap-x-3">
-              <AddCinemaModal />
+              <AddCinemaModal handleRefetch={handleRefetch} />
             </div>
           </div>
         </div>
@@ -125,11 +143,15 @@ export default function CinemaPage() {
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden shadow">
-              <CinemaTable cinemaApiResponse={cinemaApiResponse} />
+              <CinemaTable
+                cinemaApiResponse={cinemaApiResponse}
+                handleRefetch={handleRefetch}
+              />
             </div>
           </div>
         </div>
       </div>
+
       <Pagination
         cinemaApiResponse={cinemaApiResponse}
         currentSearched={currentSearched}
@@ -139,7 +161,9 @@ export default function CinemaPage() {
   );
 }
 
-const AddCinemaModal = function () {
+const AddCinemaModal: React.FC<{
+  handleRefetch: () => void;
+}> = ({ handleRefetch }) => {
   const [isOpen, setOpen] = useState(false);
   const [formData, setFormData] = useState<CinemaData>({
     name: "",
@@ -157,14 +181,31 @@ const AddCinemaModal = function () {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (
+      Object.values(formData).some(
+        (value) =>
+          (typeof value === "string" && value.trim() === "") ||
+          value === null ||
+          value === undefined
+      )
+    ) {
+      toast.error("Please fill in all the fields");
+      return;
+    }
     apiClient
       .post(`/cinema`, JSON.stringify(formData))
       .then((response) => {
-        console.log("Post request was successful:", response.data);
-        location.reload();
+        handleRefetch();
+        setOpen(false);
+        setFormData({
+          name: "",
+          description: "",
+          city: "",
+        });
+        toast.success("Add cinema successfully");
       })
       .catch((error) => {
-        console.error("Error posting data:", error);
+        toast.error(error);
       });
   };
 
@@ -215,7 +256,8 @@ const AddCinemaModal = function () {
 
 const EditProductModal: React.FC<{
   data: CinemaData | undefined;
-}> = ({ data }) => {
+  handleRefetch: () => void;
+}> = ({ data, handleRefetch }) => {
   const [isOpen, setOpen] = useState(false);
 
   const [formData, setFormData] = useState<CinemaData>({
@@ -235,15 +277,27 @@ const EditProductModal: React.FC<{
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log(formData);
+    if (
+      Object.values(formData).some(
+        (value) =>
+          (typeof value === "string" && value.trim() === "") ||
+          value === null ||
+          value === undefined
+      )
+    ) {
+      toast.error("Please fill in all the fields");
+      return;
+    }
     apiClient
       .put(`/cinema`, JSON.stringify(formData))
       .then((response) => {
-        const result = response.data;
-        console.log("Put request was successful:", result);
-        location.reload();
+        setOpen(false);
+        handleRefetch();
+        toast.success("Edit cinema successfully");
       })
       .catch((error) => {
-        console.error("Error putting data:", error);
+        toast.error(error);
       });
   };
 
@@ -305,24 +359,20 @@ const EditProductModal: React.FC<{
 
 const DeleteProductModal: React.FC<{
   cinemaId: number | undefined;
-}> = ({ cinemaId }) => {
+  handleRefetch: () => void;
+}> = ({ cinemaId, handleRefetch }) => {
   const [isOpen, setOpen] = useState(false);
   const deleteHandle = () => {
     setOpen(false);
     apiClient
       .delete(`/cinema?Id=${cinemaId}`)
-      // .then((response) => {
-      //   if (!response.ok) {
-      //     throw new Error("Network response was not ok");
-      //   }
-      //   return response.json();
-      // })
+
       .then((response) => {
-        console.log("Delete request was successful:", response.data);
-        location.reload();
+        handleRefetch();
+        toast.success("Delete cinema successfully");
       })
       .catch((error) => {
-        console.error("Error deleting data:", error);
+        toast.error(error);
       });
   };
 
@@ -359,7 +409,8 @@ const DeleteProductModal: React.FC<{
 
 const CinemaTable: React.FC<{
   cinemaApiResponse: CinemaApiResponse | undefined;
-}> = ({ cinemaApiResponse }) => {
+  handleRefetch: () => void;
+}> = ({ cinemaApiResponse, handleRefetch }) => {
   return (
     <Table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
       <Table.Head className="bg-gray-100 dark:bg-gray-700">
@@ -371,45 +422,21 @@ const CinemaTable: React.FC<{
       <Table.Body className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
         {cinemaApiResponse?.data &&
           cinemaApiResponse.data.map((data) => (
-            <CinemaRow data={data} key={data.id} />
+            <CinemaRow
+              data={data}
+              key={data.id}
+              handleRefetch={handleRefetch}
+            />
           ))}
       </Table.Body>
-      {/* <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-            <div className="text-base font-semibold text-gray-900 dark:text-white">
-              CGV Da Nang
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400"></div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            41 Ton Duc Thang - Da Nang
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            <div className="flex gap-x-3 justify-center content-center mb-3">
-              <div className="flex justify-center items-center">Room 1</div>
-              <ChangeNameModal />
-              <DeleteProductModal />
-            </div>
-
-            <div className="flex gap-x-3 justify-center content-center">
-              <div className="flex justify-center items-center">Room 2</div>
-              <ChangeNameModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-
-          <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-            <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-        </Table.Row> */}
     </Table>
   );
 };
 
-const CinemaRow: React.FC<{ data: CinemaData | undefined }> = ({ data }) => {
+const CinemaRow: React.FC<{
+  data: CinemaData | undefined;
+  handleRefetch: () => void;
+}> = ({ data, handleRefetch }) => {
   return (
     <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
       <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
@@ -427,8 +454,11 @@ const CinemaRow: React.FC<{ data: CinemaData | undefined }> = ({ data }) => {
 
       <Table.Cell className="space-x-2 whitespace-nowrap p-4">
         <div className="flex items-center gap-x-3">
-          <EditProductModal data={data} />
-          <DeleteProductModal cinemaId={data?.id} />
+          <EditProductModal data={data} handleRefetch={handleRefetch} />
+          <DeleteProductModal
+            cinemaId={data?.id}
+            handleRefetch={handleRefetch}
+          />
         </div>
       </Table.Cell>
     </Table.Row>

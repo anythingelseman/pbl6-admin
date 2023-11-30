@@ -12,6 +12,7 @@ import {
   TextInput,
   Datepicker,
   Select,
+  Spinner,
 } from "flowbite-react";
 import { useState, useEffect, useRef } from "react";
 import { FaPlus } from "react-icons/fa";
@@ -132,36 +133,28 @@ export default function SchedulingPage() {
   const [filmApiResponse, setFilmApiResponse] = useState<FilmApiResponse>();
   const [currentRooms, setCurrentRooms] = useState<RoomData[]>();
   const [cinemaId, setCinemaId] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFetchingSchedule, setIsFetchingSchedule] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await apiClient.get<FilmApiResponse | undefined>(
+      setIsLoading(true);
+      const response1 = await apiClient.get<FilmApiResponse | undefined>(
         `/film?OrderBy=id`
       );
-      setFilmApiResponse(response.data);
-      console.log(response.data);
-    };
-    fetchData();
-  }, []);
+      setFilmApiResponse(response1.data);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await apiClient.get(`/Room?OrderBy=id`);
-      const data = response.data;
-      setRoomApiResponse(data);
-      console.log(data);
-    };
-    fetchData();
-  }, []);
+      const response2 = await apiClient.get(`/Room?OrderBy=id`);
+      const data2 = response2.data;
+      setRoomApiResponse(data2);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await apiClient.get<CinemaApiResponse | undefined>(
+      const response3 = await apiClient.get<CinemaApiResponse | undefined>(
         `/cinema?OrderBy=id`
       );
-      const data = response.data;
-      setCinemaApiResponse(data);
-      console.log(data);
+      const data3 = response3.data;
+      setCinemaApiResponse(data3);
+
+      setIsLoading(false);
     };
     fetchData();
   }, []);
@@ -179,11 +172,12 @@ export default function SchedulingPage() {
 
   const searchHandle = async () => {
     try {
+      setIsFetchingSchedule(true);
       const response = await apiClient.get(`/schedule/cinema/${cinemaId}`);
       const data = response.data;
       setScheduleApiResponse(data);
       setCurrentRooms(getRoomsByCinemaId(roomApiResponse?.data, cinemaId));
-      console.log(data);
+      setIsFetchingSchedule(false);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -195,6 +189,13 @@ export default function SchedulingPage() {
     );
     return foundCinema?.name || "";
   }
+
+  if (isLoading)
+    return (
+      <div className="flex justify-center content-center min-h-screen">
+        <Spinner className="mt-60" />
+      </div>
+    );
 
   return (
     <>
@@ -228,6 +229,7 @@ export default function SchedulingPage() {
                 filmApiResponse={filmApiResponse}
                 cinemaName={getCinemaNameById(cinemaId)}
                 currentRooms={currentRooms}
+                refetchHandle={searchHandle}
               />
             </div>
           </div>
@@ -237,7 +239,12 @@ export default function SchedulingPage() {
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden shadow">
-              {scheduleApiResponse && (
+              {isFetchingSchedule && (
+                <div className="flex justify-center content-center min-h-screen">
+                  <Spinner className="mt-60" />
+                </div>
+              )}
+              {scheduleApiResponse && !isFetchingSchedule && (
                 <ScheduleTable
                   scheduleApiResponse={scheduleApiResponse}
                   currentRooms={currentRooms}
@@ -255,7 +262,8 @@ const AddScheduleModal: React.FC<{
   filmApiResponse: FilmApiResponse | undefined;
   cinemaName: string;
   currentRooms: RoomData[] | undefined;
-}> = ({ filmApiResponse, cinemaName, currentRooms }) => {
+  refetchHandle: () => void;
+}> = ({ filmApiResponse, cinemaName, currentRooms, refetchHandle }) => {
   const [isOpen, setOpen] = useState(false);
   const [formData, setFormData] = useState<ScheduleItem>({
     duration: 0,
@@ -283,13 +291,31 @@ const AddScheduleModal: React.FC<{
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.filmId) throw new Error("Please select a film");
-    if (!formData.roomId) throw new Error("Please select a room");
+    if (
+      Object.values(formData).some(
+        (value) =>
+          (typeof value === "string" && value.trim() === "") ||
+          value === null ||
+          value === undefined
+      )
+    ) {
+      toast.error("Please fill in all the fields");
+      return;
+    }
     apiClient
       .post(`/schedule`, JSON.stringify(formData))
       .then((response) => {
-        console.log("Post request was successful:", response.data);
-        location.reload();
+        refetchHandle();
+        setOpen(false);
+        setFormData({
+          duration: 0,
+          description: "",
+          startTime: "",
+          filmId: 0,
+          roomId: 0,
+          price: 0,
+        });
+        toast.success("Add schedule successfully");
       })
       .catch((error: any) => {
         toast.error(error.response.data.messages[0]);
@@ -299,7 +325,7 @@ const AddScheduleModal: React.FC<{
     <>
       <Button className="bg-sky-600" onClick={() => setOpen(!isOpen)}>
         <FaPlus className="mr-3 text-sm" />
-        Add schedule
+        Add schedule to current cinema
       </Button>
       <Modal
         onClose={() => {

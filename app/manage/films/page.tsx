@@ -10,6 +10,7 @@ import {
   TextInput,
   Datepicker,
   Checkbox,
+  Spinner,
 } from "flowbite-react";
 import { useState, useEffect } from "react";
 import { FaPlus } from "react-icons/fa";
@@ -93,31 +94,34 @@ export default function FilmsPage() {
   const [filmApiResponse, setFilmApiResponse] = useState<FilmApiResponse>();
   const [searchTerm, setSearchTerm] = useState("");
   const [currentSearched, setCurrentSearched] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [refetchTrigger, setRefetchTrigger] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await apiClient.get<FilmApiResponse | undefined>(
+      setIsLoading(true);
+      const response1 = await apiClient.get<FilmApiResponse | undefined>(
         `/film?OrderBy=id`
       );
-      setFilmApiResponse(response.data);
-      console.log(response.data);
-    };
-    fetchData();
-  }, []);
+      setFilmApiResponse(response1.data);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await apiClient.get<CategoryApiResponse | undefined>(
+      const response2 = await apiClient.get<CategoryApiResponse | undefined>(
         `/category?PageSize=50&OrderBy=id`
       );
-      setCategoryApiResponse(response.data);
-      console.log(response.data);
+      setCategoryApiResponse(response2.data);
+      setIsLoading(false);
+      setCurrentSearched("");
+      setSearchTerm("");
     };
     fetchData();
-  }, []);
+  }, [refetchTrigger]);
 
   const changeHandle = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+  };
+
+  const handleRefetch = () => {
+    setRefetchTrigger((prev) => !prev);
   };
 
   const searchHandle = async () => {
@@ -131,6 +135,13 @@ export default function FilmsPage() {
       console.error("Error fetching data:", error);
     }
   };
+
+  if (isLoading)
+    return (
+      <div className="flex justify-center content-center min-h-screen">
+        <Spinner className="mt-60" />
+      </div>
+    );
 
   return (
     <>
@@ -162,7 +173,10 @@ export default function FilmsPage() {
             </div>
 
             <div className="flex w-full items-center sm:justify-end">
-              <AddProductModal categoryData={CategoryApiResponse?.data} />
+              <AddProductModal
+                categoryData={CategoryApiResponse?.data}
+                handleRefetch={handleRefetch}
+              />
             </div>
           </div>
         </div>
@@ -174,6 +188,7 @@ export default function FilmsPage() {
               <FilmTable
                 filmApiResponse={filmApiResponse}
                 categoryData={CategoryApiResponse?.data}
+                handleRefetch={handleRefetch}
               />
             </div>
           </div>
@@ -190,10 +205,9 @@ export default function FilmsPage() {
 
 const AddProductModal: React.FC<{
   categoryData: CategoryData[] | undefined;
-}> = ({ categoryData }) => {
-  const [isOpen, setOpen] = useState(false);
-  const [uploadImages, setUploadImages] = useState<any>([]);
-  const [formData, setFormData] = useState<FilmData>({
+  handleRefetch: () => void;
+}> = ({ categoryData, handleRefetch }) => {
+  const initialValue = {
     name: "",
     actor: "",
     director: "",
@@ -213,8 +227,11 @@ const AddProductModal: React.FC<{
         typeFile: "",
       },
     ],
-    poster: "",
-  });
+    poster: "a",
+  };
+  const [isOpen, setOpen] = useState(false);
+  const [uploadImages, setUploadImages] = useState<any>([]);
+  const [formData, setFormData] = useState<FilmData>(initialValue);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -224,7 +241,6 @@ const AddProductModal: React.FC<{
       ...formData,
       [name]: value,
     });
-    console.log(formData);
   };
 
   const handleCheckboxChange = (categoryId: number) => {
@@ -237,13 +253,11 @@ const AddProductModal: React.FC<{
           : [...prevState.listIdCategory, categoryId],
       };
     });
-    console.log(formData);
   };
 
   const customAfter = (event: any) => {
     const file = event.target.files[0];
     file.objectURL = URL.createObjectURL(event.target.files[0]);
-    console.log(file);
     if (
       uploadImages?.filter((e: any) => {
         return e.name == file.name;
@@ -261,7 +275,7 @@ const AddProductModal: React.FC<{
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("hi");
+    console.log(formData);
     if (uploadImages.length === 0) {
       toast.error("Please select images.");
       return;
@@ -275,6 +289,19 @@ const AddProductModal: React.FC<{
       toast.error("End date is ealier than start date.");
       return;
     }
+
+    if (
+      Object.values(formData).some(
+        (value) =>
+          (typeof value === "string" && value.trim() === "") ||
+          (typeof value === "number" &&
+            (value === null || value === undefined || value === 0))
+      )
+    ) {
+      toast.error("Please fill in all the fields");
+      return;
+    }
+
     setOpen(false);
 
     const uploadPromises = uploadImages.map(async (img: any) => {
@@ -299,15 +326,15 @@ const AddProductModal: React.FC<{
           `/film`,
           JSON.stringify({ ...formData, fileImages: uploadedImages })
         );
-
-        console.log("Data film posted successfully:", response.data);
         return response.data;
       })
       .then((result) => {
-        location.reload();
+        handleRefetch();
+        setFormData(initialValue);
+        toast.success("Add film successfully");
       })
       .catch((error) => {
-        console.log(error);
+        toast.error(error);
       });
   };
 
@@ -512,7 +539,8 @@ const AddProductModal: React.FC<{
 const EditProductModal: React.FC<{
   filmId: number | undefined;
   categoryData: CategoryData[] | undefined;
-}> = ({ filmId, categoryData }) => {
+  handleRefetch: () => void;
+}> = ({ filmId, categoryData, handleRefetch }) => {
   const getCategoryIds = (categoryNames: string | undefined): number[] => {
     const namesArray = categoryNames?.split(",").map((name) => name.trim());
 
@@ -548,7 +576,7 @@ const EditProductModal: React.FC<{
         typeFile: "",
       },
     ],
-    poster: "",
+    poster: "a",
   });
 
   const fetchData = async () => {
@@ -582,7 +610,7 @@ const EditProductModal: React.FC<{
       endDate: data.endDate,
       listIdCategory: getCategoryIds(data.category),
       fileImages: transformedArray,
-      poster: "",
+      poster: "a",
     });
     console.log(formData);
   };
@@ -632,6 +660,19 @@ const EditProductModal: React.FC<{
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (
+      Object.values(formData).some(
+        (value) =>
+          (typeof value === "string" && value.trim() === "") ||
+          (typeof value === "number" &&
+            (value === null || value === undefined || value === 0))
+      )
+    ) {
+      toast.error("Please fill in all the fields");
+      return;
+    }
+
     if (formData.startDate === "" || formData.endDate === "") {
       toast.error("Please select dates");
       return;
@@ -670,24 +711,26 @@ const EditProductModal: React.FC<{
             JSON.stringify({ ...formData, fileImages: uploadedImages })
           );
 
-          console.log("Data film put successfully:", response.data);
           return response.data;
         })
         .then((result) => {
-          location.reload();
+          setOpen(false);
+          handleRefetch();
+          toast.success("Edit film successfully");
         })
         .catch((error) => {
-          console.log(error);
+          toast.error(error);
         });
     } else {
       apiClient
         .put(`/film`, JSON.stringify(formData))
         .then((response) => {
-          console.log("Put request was successful:", response.data);
-          location.reload();
+          setOpen(false);
+          handleRefetch();
+          toast.success("Edit film successfully");
         })
         .catch((error) => {
-          console.error("Error posting data:", error);
+          toast.error(error);
         });
     }
   };
@@ -954,24 +997,19 @@ const EditProductModal: React.FC<{
 
 const DeleteProductModal: React.FC<{
   filmId: number | undefined;
-}> = ({ filmId }) => {
+  handleRefetch: () => void;
+}> = ({ filmId, handleRefetch }) => {
   const [isOpen, setOpen] = useState(false);
   const deleteHandle = () => {
     setOpen(false);
     apiClient
       .delete(`/film?Id=${filmId}`)
-      // .then((response) => {
-      //   if (!response.status ) {
-      //     throw new Error("Network response was not ok");
-      //   }
-      //   return response.data;
-      // })
       .then((response) => {
-        console.log("Delete request was successful:", response.data);
-        location.reload();
+        handleRefetch();
+        toast.success("Delete cinema successfully");
       })
       .catch((error) => {
-        console.error("Error deleting data:", error);
+        toast.error(error);
       });
   };
 
@@ -1009,7 +1047,8 @@ const DeleteProductModal: React.FC<{
 const FilmTable: React.FC<{
   filmApiResponse: FilmApiResponse | undefined;
   categoryData: CategoryData[] | undefined;
-}> = ({ filmApiResponse, categoryData }) => {
+  handleRefetch: () => void;
+}> = ({ filmApiResponse, categoryData, handleRefetch }) => {
   return (
     <Table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
       <Table.Head className="bg-gray-100 dark:bg-gray-700">
@@ -1031,7 +1070,12 @@ const FilmTable: React.FC<{
       <Table.Body className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
         {filmApiResponse?.data &&
           filmApiResponse.data.map((data) => (
-            <FilmRow data={data} key={data.id} categoryData={categoryData} />
+            <FilmRow
+              data={data}
+              key={data.id}
+              categoryData={categoryData}
+              handleRefetch={handleRefetch}
+            />
           ))}
       </Table.Body>
     </Table>
@@ -1041,7 +1085,8 @@ const FilmTable: React.FC<{
 const FilmRow: React.FC<{
   data: FilmData | undefined;
   categoryData: CategoryData[] | undefined;
-}> = ({ data, categoryData }) => {
+  handleRefetch: () => void;
+}> = ({ data, categoryData, handleRefetch }) => {
   const formatDate = (date: string) => {
     const dateObject = new Date(date);
 
@@ -1103,8 +1148,12 @@ const FilmRow: React.FC<{
       </Table.Cell>
       <Table.Cell className="space-x-2 whitespace-nowrap p-4">
         <div className="flex items-center gap-x-3">
-          <EditProductModal filmId={data?.id} categoryData={categoryData} />
-          <DeleteProductModal filmId={data?.id} />
+          <EditProductModal
+            filmId={data?.id}
+            categoryData={categoryData}
+            handleRefetch={handleRefetch}
+          />
+          <DeleteProductModal filmId={data?.id} handleRefetch={handleRefetch} />
         </div>
       </Table.Cell>
     </Table.Row>
