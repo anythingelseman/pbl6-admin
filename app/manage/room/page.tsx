@@ -11,6 +11,7 @@ import {
   Datepicker,
   Select,
   Spinner,
+  Radio,
 } from "flowbite-react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
@@ -199,7 +200,7 @@ const AddRoomModal: React.FC<{
   const [formData, setFormData] = useState<RoomData>({
     name: "",
     numberSeat: 0,
-    status: 0,
+    status: 1,
     cinemaId: 1,
     numberRow: 0,
     numberColumn: 0,
@@ -237,7 +238,7 @@ const AddRoomModal: React.FC<{
         setFormData({
           name: "",
           numberSeat: 0,
-          status: 0,
+          status: 1,
           cinemaId: 1,
           numberRow: 0,
           numberColumn: 0,
@@ -245,7 +246,7 @@ const AddRoomModal: React.FC<{
         toast.success("Add room successfully");
       })
       .catch((error) => {
-        toast.error(error);
+        toast.error(error.response.data.messages[0]);
       });
   };
 
@@ -279,16 +280,29 @@ const AddRoomModal: React.FC<{
                 onChange={handleChange}
               />
             </div>
-            <div className="mb-3">
-              <Label>Status</Label>
-              <TextInput
-                type="number"
-                name="status"
-                className="mt-1"
-                onChange={handleChange}
-              />
+            <div className="mt-3 flex max-w-md flex-col gap-4">
+              <Label className="text-md">Status</Label>
+              <div className="flex items-center gap-2">
+                <Radio
+                  id="available"
+                  name="status"
+                  value="1"
+                  defaultChecked
+                  onChange={handleChange}
+                />
+                <Label htmlFor="available">Available</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Radio
+                  id="close"
+                  name="status"
+                  value="0"
+                  onChange={handleChange}
+                />
+                <Label htmlFor="close">Close</Label>
+              </div>
             </div>
-            <div className="mb-3">
+            <div className="mb-3 mt-3">
               <Label>Number of row</Label>
               <TextInput
                 type="number"
@@ -382,7 +396,7 @@ const EditProductModal: React.FC<{
         toast.success("Edit room successfully");
       })
       .catch((error) => {
-        toast.error(error);
+        toast.error(error.response.data.messages[0]);
       });
   };
 
@@ -422,17 +436,30 @@ const EditProductModal: React.FC<{
                 value={formData.numberSeat}
               />
             </div>
-            <div className="mb-3">
-              <Label>Status</Label>
-              <TextInput
-                type="number"
-                name="status"
-                className="mt-1"
-                onChange={handleChange}
-                value={formData.status}
-              />
+            <div className="mt-3 flex max-w-md flex-col gap-4">
+              <Label className="text-md">Status</Label>
+              <div className="flex items-center gap-2">
+                <Radio
+                  id="available"
+                  name="status"
+                  value="1"
+                  checked={formData?.status == 1}
+                  onChange={handleChange}
+                />
+                <Label htmlFor="available">Available</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Radio
+                  id="close"
+                  name="status"
+                  value="0"
+                  checked={formData?.status == 0}
+                  onChange={handleChange}
+                />
+                <Label htmlFor="close">Close</Label>
+              </div>
             </div>
-            <div className="mb-3">
+            <div className="mb-3 mt-3">
               <Label>Number of row</Label>
               <TextInput
                 type="number"
@@ -495,7 +522,7 @@ const DeleteProductModal: React.FC<{
         toast.success("Delete room successfully");
       })
       .catch((error) => {
-        toast.error(error);
+        toast.error(error.response.data.messages[0]);
       });
   };
 
@@ -586,7 +613,7 @@ const RoomRow: React.FC<{
         {data?.numberSeat}
       </Table.Cell>
       <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 ">
-        {data?.status}
+        {data?.status === 1 ? "Available" : "Close"}
       </Table.Cell>
       <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 ">
         {cinemaName}

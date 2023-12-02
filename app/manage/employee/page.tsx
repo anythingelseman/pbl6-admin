@@ -35,6 +35,7 @@ interface EmployeeData {
   imageFile?: any;
   imageLink?: any;
   email?: string | undefined;
+  password?: string | undefined;
 }
 
 interface EmployeeApiResponse {
@@ -198,17 +199,18 @@ const AddEmployeeModal: React.FC<{
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (
-      Object.values(formData).some(
-        (value) =>
-          (typeof value === "string" && value.trim() === "") ||
-          value === null ||
-          value === undefined
-      )
-    ) {
-      toast.error("Please fill in all the fields");
-      return;
-    }
+    if (formData.password)
+      if (
+        Object.values(formData).some(
+          (value) =>
+            (typeof value === "string" && value.trim() === "") ||
+            value === null ||
+            value === undefined
+        )
+      ) {
+        toast.error("Please fill in all the fields");
+        return;
+      }
     apiClient
       .post(`/employee`, JSON.stringify(formData))
       .then((response) => {
@@ -217,8 +219,8 @@ const AddEmployeeModal: React.FC<{
         setFormData(initialData);
         toast.success("Add employee successfully");
       })
-      .catch((error) => {
-        toast.error(error);
+      .catch((error: any) => {
+        toast.error(error.response.data.messages[0]);
       });
   };
 
@@ -371,7 +373,7 @@ const DeleteProductModal: React.FC<{
         toast.success("Delete employee successfully");
       })
       .catch((error) => {
-        toast.error(error);
+        toast.error(error.response.data.messages[0]);
       });
   };
 

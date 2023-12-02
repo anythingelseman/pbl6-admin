@@ -185,7 +185,7 @@ const AddProductModal: React.FC<{
       setFormData({ name: "" });
       handleRefetch();
     } catch (error: any) {
-      toast.error(error);
+      toast.error(error.response.data.messages[0]);
     }
   };
 
