@@ -334,7 +334,7 @@ const AddProductModal: React.FC<{
         toast.success("Add film successfully");
       })
       .catch((error) => {
-        toast.error(error);
+        toast.error(error.response.data.messages[0]);
       });
   };
 
@@ -719,7 +719,7 @@ const EditProductModal: React.FC<{
           toast.success("Edit film successfully");
         })
         .catch((error) => {
-          toast.error(error);
+          toast.error(error.response.data.messages[0]);
         });
     } else {
       apiClient
@@ -730,7 +730,7 @@ const EditProductModal: React.FC<{
           toast.success("Edit film successfully");
         })
         .catch((error) => {
-          toast.error(error);
+          toast.error(error.response.data.messages[0]);
         });
     }
   };
@@ -1009,7 +1009,7 @@ const DeleteProductModal: React.FC<{
         toast.success("Delete cinema successfully");
       })
       .catch((error) => {
-        toast.error(error);
+        toast.error(error.response.data.messages[0]);
       });
   };
 

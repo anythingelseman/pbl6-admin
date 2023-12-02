@@ -205,7 +205,7 @@ const AddCinemaModal: React.FC<{
         toast.success("Add cinema successfully");
       })
       .catch((error) => {
-        toast.error(error);
+        toast.error(error.response.data.messages[0]);
       });
   };
 
@@ -297,7 +297,7 @@ const EditProductModal: React.FC<{
         toast.success("Edit cinema successfully");
       })
       .catch((error) => {
-        toast.error(error);
+        toast.error(error.response.data.messages[0]);
       });
   };
 
@@ -372,7 +372,7 @@ const DeleteProductModal: React.FC<{
         toast.success("Delete cinema successfully");
       })
       .catch((error) => {
-        toast.error(error);
+        toast.error(error.response.data.messages[0]);
       });
   };
 

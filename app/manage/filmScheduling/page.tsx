@@ -477,7 +477,7 @@ const ScheduleTable: React.FC<{
         toast.success("Delete room successfully");
       })
       .catch((error) => {
-        toast.error(error);
+        toast.error(error.response.data.messages[0]);
       });
   };
 
