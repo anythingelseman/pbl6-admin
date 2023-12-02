@@ -178,7 +178,7 @@ const AddProductModal: React.FC<{
 
     try {
       const response = await apiClient.post(
-        `${apiUrl}/category`,
+        `/category`,
         JSON.stringify(formData)
       );
       setOpen(false);
