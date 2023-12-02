@@ -199,18 +199,17 @@ const AddEmployeeModal: React.FC<{
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.password)
-      if (
-        Object.values(formData).some(
-          (value) =>
-            (typeof value === "string" && value.trim() === "") ||
-            value === null ||
-            value === undefined
-        )
-      ) {
-        toast.error("Please fill in all the fields");
-        return;
-      }
+    if (
+      Object.values(formData).some(
+        (value) =>
+          (typeof value === "string" && value.trim() === "") ||
+          value === null ||
+          value === undefined
+      )
+    ) {
+      toast.error("Please fill in all the fields");
+      return;
+    }
     apiClient
       .post(`/employee`, JSON.stringify(formData))
       .then((response) => {
