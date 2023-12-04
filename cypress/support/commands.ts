@@ -35,3 +35,25 @@
 //     }
 //   }
 // }
+
+declare namespace Cypress {
+    interface Chainable<Subject> {
+      loginAdmin(): typeof loginAdmin;
+    }
+  }
+  
+  Cypress.Commands.add('loginAdmin' as any, loginAdmin);
+  function loginAdmin() {
+    cy.request({
+      method: 'POST',
+      url: 'http://localhost:8001/api/identity/token',
+      body: {
+        employeeNo: 'superadmin',
+        password: 'Abc123!@#',
+      },
+    }).then((res: any) => {
+        window.localStorage.setItem('USER', JSON.stringify({'token': `${res.body.data.token}`}));
+    });
+  }
+  
+  
