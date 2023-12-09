@@ -353,7 +353,7 @@ const AddScheduleModal: React.FC<{
               </Select>
             </div>
             <div className="mb-3">
-              <Label>Duration</Label>
+              <Label>Duration (minutes)</Label>
               <TextInput
                 name="duration"
                 className="mt-1"
@@ -397,7 +397,7 @@ const AddScheduleModal: React.FC<{
               </Select>
             </div>
             <div className="mb-3">
-              <Label>Price</Label>
+              <Label>Price (VND)</Label>
               <TextInput
                 name="price"
                 className="mt-1"
