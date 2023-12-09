@@ -520,7 +520,7 @@ const ScheduleTable: React.FC<{
               />
             </div>
             <div>
-              <Label>Duration</Label>
+              <Label>Duration (minutes)</Label>
               <TextInput
                 type="number"
                 className="mt-1"
@@ -562,7 +562,7 @@ const ScheduleTable: React.FC<{
               />
             </div>
             <div className="mt-3">
-              <Label>Price</Label>
+              <Label>Price (VND)</Label>
               <TextInput
                 type="text"
                 className="mt-1"
