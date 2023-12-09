@@ -474,7 +474,7 @@ const ScheduleTable: React.FC<{
       .delete(`/schedule?Id=${selectedSchedule?.id}`)
       .then((response) => {
         refetchHandle();
-        toast.success("Delete room successfully");
+        toast.success("Delete schedule successfully");
       })
       .catch((error) => {
         toast.error(error.response.data.messages[0]);
