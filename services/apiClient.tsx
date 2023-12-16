@@ -8,7 +8,7 @@ interface SessionService {
   saveSession: (userAuth: UserAuthenticate) => void;
 }
 const apiClient: AxiosInstance = axios.create({
-  baseURL: "http://cinephilewebapi.southeastasia.cloudapp.azure.com/api/v1",
+  baseURL: "http://localhost:8001/api/v1",
   transformRequest: [],
   headers: {
     Accept: "application/json; multipart/form-data",

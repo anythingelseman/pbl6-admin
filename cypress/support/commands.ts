@@ -46,7 +46,7 @@ declare namespace Cypress {
   function loginAdmin() {
     cy.request({
       method: 'POST',
-      url: 'http://cinephilewebapi.southeastasia.cloudapp.azure.com/api/identity/token',
+      url: 'http://localhost:8001/api/identity/token',
       body: {
         employeeNo: 'superadmin',
         password: 'Abc123!@#',
