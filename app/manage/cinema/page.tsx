@@ -179,8 +179,8 @@ const AddCinemaModal: React.FC<{
     city: "",
     hotline: "",
     address: "",
-    longitude: 108,
-    latitude: 16,
+    longitude: 0,
+    latitude: 0,
     listImage: [""],
   });
 
@@ -206,11 +206,11 @@ const AddCinemaModal: React.FC<{
             // Log the new latitude and longitude.
             if (latLng) {
               console.log("Marker was dragged to:", latLng.lat(), latLng.lng());
-              setFormData({
-                ...formData,
+              setFormData((prevFormData) => ({
+                ...prevFormData,
                 longitude: latLng.lng(),
                 latitude: latLng.lat(),
-              });
+              }));
             }
           });
 
@@ -236,15 +236,19 @@ const AddCinemaModal: React.FC<{
 
             if (latLng) {
               console.log("Marker was init to:", latLng.lat(), latLng.lng());
-              setFormData({
-                ...formData,
+              setFormData((prevFormData) => ({
+                ...prevFormData,
                 longitude: latLng.lng(),
                 latitude: latLng.lat(),
-              });
+              }));
             }
             if (inputRef.current) {
               if (place.formatted_address) {
                 inputRef.current.value = place.formatted_address;
+                setFormData((prevFormData) => ({
+                  ...prevFormData,
+                  address: place.formatted_address,
+                }));
               }
             }
           });
@@ -255,10 +259,10 @@ const AddCinemaModal: React.FC<{
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prevFormData) => ({
+      ...prevFormData,
       [name]: value,
-    });
+    }));
     console.log(formData);
   };
 
@@ -395,15 +399,8 @@ const AddCinemaModal: React.FC<{
                   onChange={handleChange}
                 />
               </div>
-              <div>
-                <Label>Address</Label>
-                <TextInput
-                  name="address"
-                  className="mt-1"
-                  onChange={handleChange}
-                />
-              </div>
               <div className="lg:col-span-2">
+                <Label>Address</Label>
                 <TextInput
                   ref={inputRef}
                   id="autocomplete-input"
