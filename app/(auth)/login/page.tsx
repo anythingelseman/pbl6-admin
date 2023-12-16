@@ -32,7 +32,7 @@ export default function LoginPage() {
       const response = await axios.post(
         // `http://cinemawebapi.ddns.net:8001/api/identity/token/`,
         // `http://192.168.124.47:8001/api/identity/token`,
-        `http://localhost:8001/api/identity/token`,
+        `http://cinephilewebapi.southeastasia.cloudapp.azure.com/api/identity/token`,
 
         JSON.stringify(formData),
         {
