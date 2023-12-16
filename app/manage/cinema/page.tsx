@@ -2,6 +2,7 @@
 
 import apiClient from "@/services/apiClient";
 import globalRouter from "@/tools/globalRouter";
+import { ci } from "@fullcalendar/core/internal-common";
 import {
   Button,
   Label,
@@ -470,25 +471,122 @@ const AddCinemaModal: React.FC<{
 };
 
 const EditProductModal: React.FC<{
-  data: CinemaData | undefined;
+  cinemaId: number | undefined;
   handleRefetch: () => void;
-}> = ({ data, handleRefetch }) => {
+}> = ({ cinemaId, handleRefetch }) => {
+  const inputRef = useRef<any>();
   const [isEditImage, setIsEditImage] = useState<boolean>(false);
   const [uploadImages, setUploadImages] = useState<any>([]);
   const [apiImages, setApiImages] = useState<string[]>();
   const [isOpen, setOpen] = useState(false);
 
   const [formData, setFormData] = useState<CinemaData>({
-    id: data?.id,
-    name: data?.name,
-    description: data?.description,
-    city: data?.city,
-    hotline: data?.hotline,
-    address: data?.address,
-    longitude: data?.longitude,
-    latitude: data?.latitude,
-    listImage: data?.listImage,
+    name: "",
+    description: "",
+    city: "",
+    hotline: "",
+    address: "",
+    longitude: 0,
+    latitude: 0,
+    listImage: [],
   });
+
+  const fetchData = async () => {
+    const response = await apiClient.get(`/cinema/${cinemaId}`);
+    const data = await response.data.data;
+    setApiImages(data.listImage);
+    console.log('data cinema: ', data)
+    const transformedArray = data.listImage.map((link: string) => {
+      const parts = link.split("/");
+      const fileName = parts[parts.length - 1];
+
+      return fileName
+    });
+
+    setFormData({
+      id: data.id,
+      name: data.name,
+      description: data.description,
+      hotline: data.hotline,
+      address: data.address,
+      city: data.city,
+      listImage: transformedArray,
+    });
+    console.log(formData);
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => {
+        const mapElement = document.getElementById("map");
+        if (mapElement) {
+          const map = new google.maps.Map(mapElement, {
+            center: { lat: formData.latitude, lng: formData.longitude },
+            zoom: 13,
+          });
+
+          const marker = new google.maps.Marker({
+            map: map,
+            draggable: true,
+          });
+
+          marker.addListener("dragend", function () {
+            // Get the marker's new latitude and longitude.
+            const latLng = marker.getPosition();
+
+            // Log the new latitude and longitude.
+            if (latLng) {
+              console.log("Marker was dragged to:", latLng.lat(), latLng.lng());
+              setFormData((prevFormData) => ({
+                ...prevFormData,
+                longitude: latLng.lng(),
+                latitude: latLng.lat(),
+              }));
+            }
+          });
+
+          let autocompleteInput = document.getElementById("autocomplete-input");
+          let autocomplete = new google.maps.places.Autocomplete(
+            autocompleteInput as HTMLInputElement
+          );
+
+          // Add a listener to the PlaceAutocomplete object.
+          autocomplete.addListener("place_changed", function () {
+            // Get the place that the user selected.
+            const place = autocomplete.getPlace();
+
+            // Set the marker's position to the selected place's latitude and longitude.
+            if (place.geometry) {
+              marker.setPosition(place.geometry.location);
+              map.setCenter(place.geometry.location);
+            }
+
+            map.setZoom(14);
+            // Get the marker's new latitude and longitude.
+            const latLng = marker.getPosition();
+
+            if (latLng) {
+              console.log("Marker was init to:", latLng.lat(), latLng.lng());
+              setFormData((prevFormData) => ({
+                ...prevFormData,
+                longitude: latLng.lng(),
+                latitude: latLng.lat(),
+              }));
+            }
+            if (inputRef.current) {
+              if (place.formatted_address) {
+                inputRef.current.value = place.formatted_address;
+                setFormData((prevFormData) => ({
+                  ...prevFormData,
+                  address: place.formatted_address,
+                }));
+              }
+            }
+          });
+        }
+      }, 0);
+    }
+  }, [isOpen]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -584,7 +682,12 @@ const EditProductModal: React.FC<{
 
   return (
     <>
-      <Button className="bg-sky-600" onClick={() => setOpen(!isOpen)}>
+      <Button className="bg-sky-600" onClick={() => {
+        console.log('form data in edit cinema ', formData);
+        setOpen(!isOpen)
+        fetchData();
+      }
+      }>
         <HiPencilAlt className="mr-2 text-lg" />
         Edit
       </Button>
@@ -597,34 +700,137 @@ const EditProductModal: React.FC<{
         <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
           <strong>Edit </strong>
         </Modal.Header>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="bg-white">
           <Modal.Body>
-            <div>
-              <Label>Name</Label>
-              <TextInput
-                name="name"
-                className="mt-1"
-                onChange={handleChange}
-                value={formData?.name}
-              />
-            </div>
-            <div>
-              <Label>Description</Label>
-              <TextInput
-                name="description"
-                className="mt-1"
-                onChange={handleChange}
-                value={formData?.description}
-              />
-            </div>
-            <div>
-              <Label>City</Label>
-              <TextInput
-                name="city"
-                className="mt-1"
-                onChange={handleChange}
-                value={formData?.city}
-              />
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <div>
+                <Label>Name</Label>
+                <TextInput
+                  name="name"
+                  className="mt-1"
+                  onChange={handleChange}
+                  value={formData?.name}
+                />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <TextInput
+                  name="description"
+                  className="mt-1"
+                  onChange={handleChange}
+                  value={formData?.description}
+                />
+              </div>
+              <div>
+                <Label>City</Label>
+                <TextInput
+                  name="city"
+                  className="mt-1"
+                  onChange={handleChange}
+                  value={formData?.city}
+                />
+              </div>
+
+              <div>
+                <Label>Hotline</Label>
+                <TextInput
+                  name="hotline"
+                  className="mt-1"
+                  onChange={handleChange}
+                  value={formData?.hotline}
+                />
+              </div>
+
+              <div className="lg:col-span-2">
+                <Label>Address</Label>
+                <TextInput
+                  ref={inputRef}
+                  id="autocomplete-input"
+                  placeholder="Search for an address"
+                  value={formData.address}
+                />
+              </div>
+              <div className="lg:col-span-2">
+                <div id="map"></div>
+              </div>
+
+              {!isEditImage && (
+                <div className="lg:col-span-2">
+                  <Label className="mb-5">Image</Label>
+                  <div className="flex gap-x-3">
+                    {apiImages?.map((imageLink, index) => (
+                      <img
+                        key={index}
+                        src={imageLink}
+                        alt={`Image ${index + 1}`}
+                        width={150}
+                        height={100}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {!isEditImage && (
+                <Button
+                  className="bg-sky-600"
+                  onClick={() => setIsEditImage(true)}
+                >
+                  <HiPencilAlt className="mr-2 text-lg" />
+                  Edit image
+                </Button>
+              )}
+
+              {isEditImage && (
+                <div className="lg:col-span-2">
+                  <div className="flex w-full items-center justify-center">
+                    <label className="flex h-32 w-full cursor-pointer flex-col rounded border-2 border-dashed border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-700">
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <HiUpload className="text-4xl text-gray-300" />
+                        <p className="py-1 text-sm text-gray-600 dark:text-gray-500">
+                          Upload an image or drag and drop
+                        </p>
+                      </div>
+                      <input
+                        type="file"
+                        className="hidden"
+                        multiple
+                        accept="image/*"
+                        onChange={customAfter}
+                      />
+                    </label>
+                  </div>
+
+                  <div className="flex">
+                    {uploadImages?.map(
+                      (img: any, index: React.Key | null | undefined) => {
+                        return (
+                          <div className="img-wrap" key={index}>
+                            <img
+                              src={img.objectURL}
+                              height={100}
+                              width={150}
+                            />
+                            <span
+                              className=""
+                              onClick={(e) => {
+                                let images = uploadImages.filter(
+                                  (el: any) => {
+                                    if (el.name !== img.name) return el;
+                                  }
+                                );
+                                setUploadImages([...images]);
+                              }}
+                            >
+                              &times;
+                            </span>
+                          </div>
+                        );
+                      }
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </Modal.Body>
           <Modal.Footer>
@@ -739,7 +945,7 @@ const CinemaRow: React.FC<{
 
       <Table.Cell className="space-x-2 whitespace-nowrap p-4">
         <div className="flex items-center gap-x-3">
-          <EditProductModal data={data} handleRefetch={handleRefetch} />
+          <EditProductModal cinemaId={data?.id} handleRefetch={handleRefetch} />
           <DeleteProductModal
             cinemaId={data?.id}
             handleRefetch={handleRefetch}
@@ -759,8 +965,7 @@ const Pagination: React.FC<PaginationComponentProps> = ({
     try {
       if (!cinemaApiResponse) return;
       const response = await apiClient.get(
-        `/cinema?Keyword=${currentSearched}&PageNumber=${
-          cinemaApiResponse?.currentPage + 1
+        `/cinema?Keyword=${currentSearched}&PageNumber=${cinemaApiResponse?.currentPage + 1
         }&OrderBy=id`
       );
       const data = response.data;
@@ -775,8 +980,7 @@ const Pagination: React.FC<PaginationComponentProps> = ({
     try {
       if (!cinemaApiResponse) return;
       const response = await apiClient.get(
-        `/cinema?Keyword=${currentSearched}&PageNumber=${
-          cinemaApiResponse?.currentPage - 1
+        `/cinema?Keyword=${currentSearched}&PageNumber=${cinemaApiResponse?.currentPage - 1
         }&OrderBy=id`
       );
       const data = response.data;
@@ -792,11 +996,10 @@ const Pagination: React.FC<PaginationComponentProps> = ({
       <button
         disabled={!cinemaApiResponse?.hasPreviousPage}
         onClick={PreviousPageHandle}
-        className={`inline-flex  justify-center rounded p-1 text-gray-500 ${
-          cinemaApiResponse?.hasPreviousPage
+        className={`inline-flex  justify-center rounded p-1 text-gray-500 ${cinemaApiResponse?.hasPreviousPage
             ? "cursor-pointer hover:bg-gray-100 hover:text-gray-900"
             : "cursor-default disabled"
-        } `}
+          } `}
       >
         <HiChevronLeft className="text-2xl" />
         <span>Previous </span>
@@ -818,11 +1021,10 @@ const Pagination: React.FC<PaginationComponentProps> = ({
       <button
         disabled={!cinemaApiResponse?.hasNextPage}
         onClick={NextPageHandle}
-        className={`inline-flex  justify-center rounded p-1 text-gray-500 ${
-          cinemaApiResponse?.hasNextPage
+        className={`inline-flex  justify-center rounded p-1 text-gray-500 ${cinemaApiResponse?.hasNextPage
             ? "cursor-pointer hover:bg-gray-100 hover:text-gray-900"
             : "cursor-default"
-        } `}
+          } `}
       >
         <span>Next</span>
         <HiChevronRight className="text-2xl" />
