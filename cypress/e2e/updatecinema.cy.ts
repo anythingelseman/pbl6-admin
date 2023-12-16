@@ -7,9 +7,9 @@ describe('Test update new cinema', () => {
         cy.loginAdmin();
     });
 
-    it('TS1 - Chỉnh sửa thông tin cinema: Tên bị để trống', () => {
+    it('UC1 - Chỉnh sửa thông tin cinema: Tên bị để trống', () => {
         cy.visit('http://localhost:3000/manage/cinema');
-        cy.wait(2000);
+        cy.wait(4000);
 
         cy.contains('Edit').eq(0).click(); // open model thêm chuyên khoa
         cy.wait(100);
@@ -24,9 +24,9 @@ describe('Test update new cinema', () => {
         cy.contains('Please fill in all the fields').should('exist');
     });
 
-    it('TS2 - Chỉnh sửa thông tin cinema: Mô tả bị để trống', () => {
+    it('UC2 - Chỉnh sửa thông tin cinema: Mô tả bị để trống', () => {
         cy.visit('http://localhost:3000/manage/cinema');
-        cy.wait(2000);
+        cy.wait(4000);
 
         cy.contains('Edit').eq(0).click(); // open model thêm chuyên khoa
         cy.wait(100);
@@ -41,9 +41,9 @@ describe('Test update new cinema', () => {
         cy.contains('Please fill in all the fields').should('exist');
     });
 
-    it('TS3 - Chỉnh sửa thông tin cinema: Thành phố bị để trống', () => {
+    it('UC3 - Chỉnh sửa thông tin cinema: Thành phố bị để trống', () => {
         cy.visit('http://localhost:3000/manage/cinema');
-        cy.wait(2000);
+        cy.wait(4000);
 
         cy.contains('Edit').eq(0).click(); // open model thêm chuyên khoa
         cy.wait(100);
@@ -58,9 +58,9 @@ describe('Test update new cinema', () => {
         cy.contains('Please fill in all the fields').should('exist');
     });
 
-    it('TS4 - Chỉnh sửa thông tin cinema: Cập nhật thành công', () => {
+    it('UC4 - Chỉnh sửa thông tin cinema: Cập nhật thành công', () => {
         cy.visit('http://localhost:3000/manage/cinema');
-        cy.wait(2000);
+        cy.wait(4000);
 
         cy.contains('Edit').eq(0).click(); 
         cy.wait(100);

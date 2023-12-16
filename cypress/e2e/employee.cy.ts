@@ -7,7 +7,7 @@ describe('Test create new employee', () => {
     cy.loginAdmin();
   });
 
-  it('Thêm CK1: Tên bị để trống', () => {
+  it('CE1: Tên bị để trống', () => {
     cy.visit('http://localhost:3000/manage/employee');
     cy.wait(2000);
 
@@ -28,7 +28,7 @@ describe('Test create new employee', () => {
   });
 
 
-  it('Thêm CK1: email bị để trống', () => {
+  it('CE2: email bị để trống', () => {
     cy.visit('http://localhost:3000/manage/employee');
     cy.wait(2000);
 
@@ -48,7 +48,7 @@ describe('Test create new employee', () => {
     cy.contains('Please fill in all the fields').should('exist');
   });
 
-  it('Thêm CK1: username bị để trống', () => {
+  it('CE3: username bị để trống', () => {
     cy.visit('http://localhost:3000/manage/employee');
     cy.wait(2000);
 
@@ -88,7 +88,7 @@ describe('Test create new employee', () => {
   //   cy.contains('Please fill in all the fields').should('exist');
   // });
 
-  it('Thêm CK1: password bị để trống', () => {
+  it('CE4: password bị để trống', () => {
     cy.visit('http://localhost:3000/manage/employee');
     cy.wait(2000);
 
@@ -108,7 +108,7 @@ describe('Test create new employee', () => {
     cy.contains('Please fill in all the fields').should('exist');
   });
 
-  it('Thêm CK1: trùng email', () => {
+  it('CE5: trùng email', () => {
     cy.visit('http://localhost:3000/manage/employee');
     cy.wait(2000);
 
@@ -129,7 +129,7 @@ describe('Test create new employee', () => {
     cy.contains('Email already exists in the database.').should('exist');
   });
 
-  it('Thêm CK1: trùng username', () => {
+  it('CE6: trùng username', () => {
     cy.visit('http://localhost:3000/manage/employee');
     cy.wait(2000);
 
@@ -150,7 +150,7 @@ describe('Test create new employee', () => {
     cy.contains('Username already exists in the database.').should('exist');
   });
 
-  it('Thêm CK1: Password must be at least 8 characters.', () => {
+  it('CE7: Password must be at least 8 characters.', () => {
     cy.visit('http://localhost:3000/manage/employee');
     cy.wait(2000);
 
@@ -171,7 +171,7 @@ describe('Test create new employee', () => {
     cy.contains('Password must be at least 8 characters.').should('exist');
   });
 
-  it('Thêm CK1: Create successfully.', () => {
+  it('CE8: Create successfully.', () => {
     cy.visit('http://localhost:3000/manage/employee');
     cy.wait(2000);
 
