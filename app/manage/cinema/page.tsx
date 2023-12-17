@@ -753,6 +753,8 @@ const EditProductModal: React.FC<{
                   id="autocomplete-input"
                   placeholder="Search for an address"
                   value={formData.address}
+                  onChange={handleChange}
+                  name="address"
                 />
               </div>
               <div className="lg:col-span-2">
