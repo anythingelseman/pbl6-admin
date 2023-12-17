@@ -258,7 +258,9 @@ const AddCinemaModal: React.FC<{
     }
   }, [isOpen]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prevFormData) => ({
       ...prevFormData,
@@ -376,10 +378,11 @@ const AddCinemaModal: React.FC<{
                   onChange={handleChange}
                 />
               </div>
-              <div>
+              <div className="lg:col-span-2">
                 <Label>Description</Label>
-                <TextInput
+                <Textarea
                   name="description"
+                  rows={6}
                   className="mt-1"
                   onChange={handleChange}
                 />
@@ -495,12 +498,12 @@ const EditProductModal: React.FC<{
     const response = await apiClient.get(`/cinema/${cinemaId}`);
     const data = await response.data.data;
     setApiImages(data.listImage);
-    console.log('data cinema: ', data)
+    console.log("data cinema: ", data);
     const transformedArray = data.listImage.map((link: string) => {
       const parts = link.split("/");
       const fileName = parts[parts.length - 1];
 
-      return fileName
+      return fileName;
     });
 
     setFormData({
@@ -512,88 +515,18 @@ const EditProductModal: React.FC<{
       city: data.city,
       listImage: transformedArray,
     });
-    console.log(formData);
+    return data;
   };
 
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => {
-        const mapElement = document.getElementById("map");
-        if (mapElement) {
-          const map = new google.maps.Map(mapElement, {
-            center: { lat: formData.latitude, lng: formData.longitude },
-            zoom: 13,
-          });
-
-          const marker = new google.maps.Marker({
-            map: map,
-            draggable: true,
-          });
-
-          marker.addListener("dragend", function () {
-            // Get the marker's new latitude and longitude.
-            const latLng = marker.getPosition();
-
-            // Log the new latitude and longitude.
-            if (latLng) {
-              console.log("Marker was dragged to:", latLng.lat(), latLng.lng());
-              setFormData((prevFormData) => ({
-                ...prevFormData,
-                longitude: latLng.lng(),
-                latitude: latLng.lat(),
-              }));
-            }
-          });
-
-          let autocompleteInput = document.getElementById("autocomplete-input");
-          let autocomplete = new google.maps.places.Autocomplete(
-            autocompleteInput as HTMLInputElement
-          );
-
-          // Add a listener to the PlaceAutocomplete object.
-          autocomplete.addListener("place_changed", function () {
-            // Get the place that the user selected.
-            const place = autocomplete.getPlace();
-
-            // Set the marker's position to the selected place's latitude and longitude.
-            if (place.geometry) {
-              marker.setPosition(place.geometry.location);
-              map.setCenter(place.geometry.location);
-            }
-
-            map.setZoom(14);
-            // Get the marker's new latitude and longitude.
-            const latLng = marker.getPosition();
-
-            if (latLng) {
-              console.log("Marker was init to:", latLng.lat(), latLng.lng());
-              setFormData((prevFormData) => ({
-                ...prevFormData,
-                longitude: latLng.lng(),
-                latitude: latLng.lat(),
-              }));
-            }
-            if (inputRef.current) {
-              if (place.formatted_address) {
-                inputRef.current.value = place.formatted_address;
-                setFormData((prevFormData) => ({
-                  ...prevFormData,
-                  address: place.formatted_address,
-                }));
-              }
-            }
-          });
-        }
-      }, 0);
-    }
-  }, [isOpen]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prevFormData) => ({
+      ...prevFormData,
       [name]: value,
-    });
+    }));
+    console.log(formData);
   };
 
   const customAfter = (event: any) => {
@@ -680,14 +613,82 @@ const EditProductModal: React.FC<{
     }
   };
 
+  const openHandle = async () => {
+    setOpen(!isOpen);
+    const data = await fetchData();
+    setTimeout(() => {
+      const mapElement = document.getElementById("map");
+      if (mapElement) {
+        const map = new google.maps.Map(mapElement, {
+          center: { lat: data.latitude ?? 0, lng: data.longitude ?? 0 },
+          zoom: 13,
+        });
+
+        const marker = new google.maps.Marker({
+          map: map,
+          draggable: true,
+        });
+
+        marker.addListener("dragend", function () {
+          // Get the marker's new latitude and longitude.
+          const latLng = marker.getPosition();
+
+          // Log the new latitude and longitude.
+          if (latLng) {
+            console.log("Marker was dragged to:", latLng.lat(), latLng.lng());
+            setFormData((prevFormData) => ({
+              ...prevFormData,
+              longitude: latLng.lng(),
+              latitude: latLng.lat(),
+            }));
+          }
+        });
+
+        let autocompleteInput = document.getElementById("autocomplete-input");
+        let autocomplete = new google.maps.places.Autocomplete(
+          autocompleteInput as HTMLInputElement
+        );
+
+        // Add a listener to the PlaceAutocomplete object.
+        autocomplete.addListener("place_changed", function () {
+          // Get the place that the user selected.
+          const place = autocomplete.getPlace();
+
+          // Set the marker's position to the selected place's latitude and longitude.
+          if (place.geometry) {
+            marker.setPosition(place.geometry.location);
+            map.setCenter(place.geometry.location);
+          }
+
+          map.setZoom(14);
+          // Get the marker's new latitude and longitude.
+          const latLng = marker.getPosition();
+
+          if (latLng) {
+            console.log("Marker was init to:", latLng.lat(), latLng.lng());
+            setFormData((prevFormData) => ({
+              ...prevFormData,
+              longitude: latLng.lng(),
+              latitude: latLng.lat(),
+            }));
+          }
+          if (inputRef.current) {
+            if (place.formatted_address) {
+              inputRef.current.value = place.formatted_address;
+              setFormData((prevFormData) => ({
+                ...prevFormData,
+                address: place.formatted_address,
+              }));
+            }
+          }
+        });
+      }
+    }, 0);
+  };
+
   return (
     <>
-      <Button className="bg-sky-600" onClick={() => {
-        console.log('form data in edit cinema ', formData);
-        setOpen(!isOpen)
-        fetchData();
-      }
-      }>
+      <Button className="bg-sky-600" onClick={openHandle}>
         <HiPencilAlt className="mr-2 text-lg" />
         Edit
       </Button>
@@ -712,13 +713,14 @@ const EditProductModal: React.FC<{
                   value={formData?.name}
                 />
               </div>
-              <div>
+              <div className="lg:col-span-2">
                 <Label>Description</Label>
-                <TextInput
+                <Textarea
                   name="description"
+                  rows={6}
                   className="mt-1"
                   onChange={handleChange}
-                  value={formData?.description}
+                  value={formData.description}
                 />
               </div>
               <div>
@@ -806,19 +808,13 @@ const EditProductModal: React.FC<{
                       (img: any, index: React.Key | null | undefined) => {
                         return (
                           <div className="img-wrap" key={index}>
-                            <img
-                              src={img.objectURL}
-                              height={100}
-                              width={150}
-                            />
+                            <img src={img.objectURL} height={100} width={150} />
                             <span
                               className=""
                               onClick={(e) => {
-                                let images = uploadImages.filter(
-                                  (el: any) => {
-                                    if (el.name !== img.name) return el;
-                                  }
-                                );
+                                let images = uploadImages.filter((el: any) => {
+                                  if (el.name !== img.name) return el;
+                                });
                                 setUploadImages([...images]);
                               }}
                             >
@@ -965,7 +961,8 @@ const Pagination: React.FC<PaginationComponentProps> = ({
     try {
       if (!cinemaApiResponse) return;
       const response = await apiClient.get(
-        `/cinema?Keyword=${currentSearched}&PageNumber=${cinemaApiResponse?.currentPage + 1
+        `/cinema?Keyword=${currentSearched}&PageNumber=${
+          cinemaApiResponse?.currentPage + 1
         }&OrderBy=id`
       );
       const data = response.data;
@@ -980,7 +977,8 @@ const Pagination: React.FC<PaginationComponentProps> = ({
     try {
       if (!cinemaApiResponse) return;
       const response = await apiClient.get(
-        `/cinema?Keyword=${currentSearched}&PageNumber=${cinemaApiResponse?.currentPage - 1
+        `/cinema?Keyword=${currentSearched}&PageNumber=${
+          cinemaApiResponse?.currentPage - 1
         }&OrderBy=id`
       );
       const data = response.data;
@@ -996,10 +994,11 @@ const Pagination: React.FC<PaginationComponentProps> = ({
       <button
         disabled={!cinemaApiResponse?.hasPreviousPage}
         onClick={PreviousPageHandle}
-        className={`inline-flex  justify-center rounded p-1 text-gray-500 ${cinemaApiResponse?.hasPreviousPage
+        className={`inline-flex  justify-center rounded p-1 text-gray-500 ${
+          cinemaApiResponse?.hasPreviousPage
             ? "cursor-pointer hover:bg-gray-100 hover:text-gray-900"
             : "cursor-default disabled"
-          } `}
+        } `}
       >
         <HiChevronLeft className="text-2xl" />
         <span>Previous </span>
@@ -1021,10 +1020,11 @@ const Pagination: React.FC<PaginationComponentProps> = ({
       <button
         disabled={!cinemaApiResponse?.hasNextPage}
         onClick={NextPageHandle}
-        className={`inline-flex  justify-center rounded p-1 text-gray-500 ${cinemaApiResponse?.hasNextPage
+        className={`inline-flex  justify-center rounded p-1 text-gray-500 ${
+          cinemaApiResponse?.hasNextPage
             ? "cursor-pointer hover:bg-gray-100 hover:text-gray-900"
             : "cursor-default"
-          } `}
+        } `}
       >
         <span>Next</span>
         <HiChevronRight className="text-2xl" />

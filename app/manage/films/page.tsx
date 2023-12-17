@@ -306,7 +306,7 @@ const AddProductModal: React.FC<{
 
     const uploadPromises = uploadImages.map(async (img: any) => {
       const image = new FormData();
-      image.append("filePath", img.name);
+      image.append("filePath", "Film");
       image.append("file", img);
       console.log("formData" + image.get("filePath"));
 
@@ -690,7 +690,7 @@ const EditProductModal: React.FC<{
       const startDate = new Date(formData.startDate);
       const uploadPromises = uploadImages.map(async (img: any) => {
         const image = new FormData();
-        image.append("filePath", img.name);
+        image.append("filePath", "Film");
         image.append("file", img);
         console.log("formData" + image.get("filePath"));
 
@@ -1169,7 +1169,8 @@ const Pagination: React.FC<PaginationComponentProps> = ({
     try {
       if (!filmApiResponse) return;
       const response = await apiClient.get<FilmApiResponse | undefined>(
-        `/film?Keyword=${currentSearched}&PageNumber=${filmApiResponse?.currentPage + 1
+        `/film?Keyword=${currentSearched}&PageNumber=${
+          filmApiResponse?.currentPage + 1
         }&OrderBy=id`
       );
       setFilmApiResponse(response.data);
@@ -1183,7 +1184,8 @@ const Pagination: React.FC<PaginationComponentProps> = ({
     try {
       if (!filmApiResponse) return;
       const response = await apiClient.get(
-        `/film?Keyword=${currentSearched}&PageNumber=${filmApiResponse?.currentPage - 1
+        `/film?Keyword=${currentSearched}&PageNumber=${
+          filmApiResponse?.currentPage - 1
         }&OrderBy=id`
       );
       const data = response.data;
@@ -1199,10 +1201,11 @@ const Pagination: React.FC<PaginationComponentProps> = ({
       <button
         disabled={!filmApiResponse?.hasPreviousPage}
         onClick={PreviousPageHandle}
-        className={`inline-flex  justify-center rounded p-1 text-gray-500 ${filmApiResponse?.hasPreviousPage
+        className={`inline-flex  justify-center rounded p-1 text-gray-500 ${
+          filmApiResponse?.hasPreviousPage
             ? "cursor-pointer hover:bg-gray-100 hover:text-gray-900"
             : "cursor-default disabled"
-          } `}
+        } `}
       >
         <HiChevronLeft className="text-2xl" />
         <span>Previous </span>
@@ -1224,10 +1227,11 @@ const Pagination: React.FC<PaginationComponentProps> = ({
       <button
         disabled={!filmApiResponse?.hasNextPage}
         onClick={NextPageHandle}
-        className={`inline-flex  justify-center rounded p-1 text-gray-500 ${filmApiResponse?.hasNextPage
+        className={`inline-flex  justify-center rounded p-1 text-gray-500 ${
+          filmApiResponse?.hasNextPage
             ? "cursor-pointer hover:bg-gray-100 hover:text-gray-900"
             : "cursor-default"
-          } `}
+        } `}
       >
         <span>Next</span>
         <HiChevronRight className="text-2xl" />

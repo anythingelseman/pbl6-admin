@@ -27,8 +27,8 @@ import toast from "react-hot-toast";
 const apiUrl = process.env.API_URL;
 interface PosterData {
   id?: number;
-  pathImage: string,
-  linkUrl?: string,
+  pathImage: string;
+  linkUrl?: string;
   createdOn?: string; // This should be a valid date string format
   lastModifiedOn?: string; // This should be a valid date string format
 }
@@ -73,7 +73,8 @@ interface PaginationComponentProps {
 }
 
 export default function PostersPage() {
-  const [posterApiResponse, setPosterApiResponse] = useState<PosterApiResponse>();
+  const [posterApiResponse, setPosterApiResponse] =
+    useState<PosterApiResponse>();
   const [searchTerm, setSearchTerm] = useState("");
   const [currentSearched, setCurrentSearched] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -126,14 +127,12 @@ export default function PostersPage() {
         <div className="mb-1 w-full">
           <div className="mb-4">
             <h1 className="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
-              Films
+              Poster
             </h1>
           </div>
           <div className="block items-center sm:flex">
             <div className="flex w-full items-center sm:justify-end">
-              <AddPosterModal
-                handleRefetch={handleRefetch}
-              />
+              <AddPosterModal handleRefetch={handleRefetch} />
             </div>
           </div>
         </div>
@@ -161,7 +160,7 @@ export default function PostersPage() {
 
 const AddPosterModal: React.FC<{
   handleRefetch: () => void;
-}> = ({handleRefetch }) => {
+}> = ({ handleRefetch }) => {
   const initialValue = {
     pathImage: "",
     linkUrl: "",
@@ -210,7 +209,7 @@ const AddPosterModal: React.FC<{
 
     const uploadPromises = uploadImages.map(async (img: any) => {
       const image = new FormData();
-      image.append("filePath", 'Poster');
+      image.append("filePath", "Poster");
       image.append("file", img);
       console.log("formData" + image.get("filePath"));
 
@@ -223,11 +222,11 @@ const AddPosterModal: React.FC<{
 
     Promise.race(uploadPromises)
       .then(async (uploadedImages) => {
-        console.log('upload promise res: ',uploadImages);
+        console.log("upload promise res: ", uploadImages);
         formData.pathImage = uploadedImages;
         const response = await apiClient.post(
           `/Poster`,
-          JSON.stringify({ ...formData})
+          JSON.stringify({ ...formData })
         );
         return response.data;
       })
@@ -245,11 +244,11 @@ const AddPosterModal: React.FC<{
     <>
       <Button className="bg-sky-600" onClick={() => setOpen(!isOpen)}>
         <FaPlus className="mr-3 text-sm" />
-        Add film
+        Add poster
       </Button>
       <Modal onClose={() => setOpen(false)} show={isOpen}>
         <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
-          <strong>Add film</strong>
+          <strong>Add poster</strong>
         </Modal.Header>
         <form onSubmit={handleSubmit} className="bg-white">
           <Modal.Body>
@@ -357,7 +356,6 @@ const EditProductModal: React.FC<{
     console.log(formData);
   };
 
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -425,7 +423,7 @@ const EditProductModal: React.FC<{
         .then((result) => {
           setOpen(false);
           handleRefetch();
-          toast.success("Edit film successfully");
+          toast.success("Edit poster successfully");
         })
         .catch((error) => {
           toast.error(error.response.data.messages[0]);
@@ -436,7 +434,7 @@ const EditProductModal: React.FC<{
         .then((response) => {
           setOpen(false);
           handleRefetch();
-          toast.success("Edit film successfully");
+          toast.success("Edit poster successfully");
         })
         .catch((error) => {
           toast.error(error.response.data.messages[0]);
@@ -463,7 +461,7 @@ const EditProductModal: React.FC<{
         show={isOpen}
       >
         <Modal.Header className="border-b border-gray-200 !p-6 ">
-          <strong>Edit film</strong>
+          <strong>Edit poster</strong>
         </Modal.Header>
         {formData && (
           <form onSubmit={handleSubmit} className="bg-white">
@@ -583,7 +581,7 @@ const DeleteProductModal: React.FC<{
       .delete(`/Poster?Id=${posterId}`)
       .then((response) => {
         handleRefetch();
-        toast.success("Delete cinema successfully");
+        toast.success("Delete poster successfully");
       })
       .catch((error) => {
         toast.error(error.response.data.messages[0]);
@@ -604,7 +602,7 @@ const DeleteProductModal: React.FC<{
           <div className="flex flex-col items-center gap-y-6 text-center">
             <HiOutlineExclamationCircle className="text-7xl text-red-600" />
             <p className="text-lg text-gray-500 dark:text-gray-300">
-              Are you sure you want to delete this film?
+              Are you sure you want to delete this poster?
             </p>
             <div className="flex items-center gap-x-3">
               <Button color="failure" onClick={deleteHandle}>
@@ -649,7 +647,6 @@ const PosterRow: React.FC<{
   data: PosterData | undefined;
   handleRefetch: () => void;
 }> = ({ data, handleRefetch }) => {
-
   return (
     <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
       <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
@@ -672,7 +669,10 @@ const PosterRow: React.FC<{
             posterId={data?.id}
             handleRefetch={handleRefetch}
           /> */}
-          <DeleteProductModal posterId={data?.id} handleRefetch={handleRefetch} />
+          <DeleteProductModal
+            posterId={data?.id}
+            handleRefetch={handleRefetch}
+          />
         </div>
       </Table.Cell>
     </Table.Row>
