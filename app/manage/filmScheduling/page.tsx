@@ -140,16 +140,16 @@ export default function SchedulingPage() {
     const fetchData = async () => {
       setIsLoading(true);
       const response1 = await apiClient.get<FilmApiResponse | undefined>(
-        `/film?OrderBy=id`
+        `/film?IsExport=true&OrderBy=id`
       );
       setFilmApiResponse(response1.data);
 
-      const response2 = await apiClient.get(`/Room?OrderBy=id`);
+      const response2 = await apiClient.get(`/Room?IsExport=true&OrderBy=id`);
       const data2 = response2.data;
       setRoomApiResponse(data2);
 
       const response3 = await apiClient.get<CinemaApiResponse | undefined>(
-        `/cinema?OrderBy=id`
+        `/cinema?IsExport=true&OrderBy=id`
       );
       const data3 = response3.data;
       setCinemaApiResponse(data3);

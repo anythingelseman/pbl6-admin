@@ -19,7 +19,15 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <title>Cinephile Cinema Management</title>
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAHUq7rXW6gtVCss6HHxDGK9Su14uwkdU0&libraries=places&callback=initMap" async defer></script>
+        <meta
+          http-equiv="Content-Security-Policy"
+          content="upgrade-insecure-requests"
+        />
+        <script
+          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAHUq7rXW6gtVCss6HHxDGK9Su14uwkdU0&libraries=places&callback=initMap"
+          async
+          defer
+        ></script>
       </head>
       <body className={`${inter.className} min-h-screen `}>
         <Toaster
