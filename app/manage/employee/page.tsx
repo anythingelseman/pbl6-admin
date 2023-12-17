@@ -347,7 +347,7 @@ const AddEmployeeModal: React.FC<{
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <Button className="bg-sky-600" type="submit">
+            <Button className="bg-sky-600" type="submit" id="Add-button">
               Add
             </Button>
           </Modal.Footer>

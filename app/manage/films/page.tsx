@@ -306,7 +306,7 @@ const AddProductModal: React.FC<{
 
     const uploadPromises = uploadImages.map(async (img: any) => {
       const image = new FormData();
-      image.append("filePath", img.name);
+      image.append("filePath", "Film");
       image.append("file", img);
       console.log("formData" + image.get("filePath"));
 
@@ -690,7 +690,7 @@ const EditProductModal: React.FC<{
       const startDate = new Date(formData.startDate);
       const uploadPromises = uploadImages.map(async (img: any) => {
         const image = new FormData();
-        image.append("filePath", img.name);
+        image.append("filePath", "Film");
         image.append("file", img);
         console.log("formData" + image.get("filePath"));
 

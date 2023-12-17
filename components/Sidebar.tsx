@@ -1,6 +1,7 @@
 import { Sidebar, TextInput } from "flowbite-react";
 import { HiSearch, HiUsers, HiFilm } from "react-icons/hi";
 import { BsFillHouseDoorFill, BsDoorClosedFill } from "react-icons/bs";
+import { PiSlideshowLight } from "react-icons/pi";
 import { BiTime, BiSolidCategoryAlt } from "react-icons/bi";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -42,6 +43,9 @@ const SideBar: React.FC<{}> = ({}) => {
 
               <Sidebar.Item href="/manage/category" icon={BiSolidCategoryAlt}>
                 Category
+              </Sidebar.Item>
+              <Sidebar.Item href="/manage/poster" icon={PiSlideshowLight}>
+                Poster
               </Sidebar.Item>
             </Sidebar.ItemGroup>
           </Sidebar.Items>
