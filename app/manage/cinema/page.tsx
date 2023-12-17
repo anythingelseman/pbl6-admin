@@ -629,6 +629,9 @@ const EditProductModal: React.FC<{
           draggable: true,
         });
 
+        let position = new google.maps.LatLng(data.latitude, data.longitude);
+        marker.setPosition(position);
+
         marker.addListener("dragend", function () {
           // Get the marker's new latitude and longitude.
           const latLng = marker.getPosition();
