@@ -1,5 +1,5 @@
 import { Sidebar, TextInput } from "flowbite-react";
-import { HiSearch, HiUsers, HiFilm } from "react-icons/hi";
+import { HiSearch, HiUsers, HiFilm, HiChartBar } from "react-icons/hi";
 import { BsFillHouseDoorFill, BsDoorClosedFill } from "react-icons/bs";
 import { PiSlideshowLight } from "react-icons/pi";
 import { BiTime, BiSolidCategoryAlt } from "react-icons/bi";
@@ -20,6 +20,10 @@ const SideBar: React.FC<{}> = ({}) => {
         <div className="rounded-none">
           <Sidebar.Items>
             <Sidebar.ItemGroup>
+              <Sidebar.Item href="/manage/dashboard" icon={HiChartBar}>
+                Dashboard
+              </Sidebar.Item>
+
               <Sidebar.Item href="/manage/films" icon={HiFilm}>
                 Film
               </Sidebar.Item>
