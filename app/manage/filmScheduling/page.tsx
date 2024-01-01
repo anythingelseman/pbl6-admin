@@ -14,7 +14,7 @@ import {
   Select,
   Spinner,
 } from "flowbite-react";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaPlus } from "react-icons/fa";
 import {
   HiOutlineExclamationCircle,
@@ -27,6 +27,15 @@ import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import apiClient from "@/services/apiClient";
 import { EventSourceInput } from "@fullcalendar/core";
 import toast from "react-hot-toast";
+import { ModalFooter } from "flowbite-react/lib/esm/components/Modal/ModalFooter";
+import { useUser } from "@/app/hooks/useUser";
+
+interface TSeat {
+  id: number;
+  numberSeat: number;
+  seatCode: string;
+  status: number;
+}
 
 interface FilmData {
   id?: number;
@@ -91,13 +100,14 @@ interface ScheduleItem {
   id?: number;
   duration: number;
   description: string;
-  startTime: string;
+  startTime?: string;
   endTime?: string;
   film?: string;
   room?: string;
   price: number;
   filmId?: number;
   roomId?: number;
+  startTimes?: any;
 }
 
 interface RoomData {
@@ -265,15 +275,36 @@ const AddScheduleModal: React.FC<{
   currentRooms: RoomData[] | undefined;
   refetchHandle: () => void;
 }> = ({ filmApiResponse, cinemaName, currentRooms, refetchHandle }) => {
+  const [startTimes, setStartTimes] = useState([{ id: 1, value: "" }]);
+  const [hours, setHours] = useState(0);
+  const [minutes, setMinutes] = useState(0);
   const [isOpen, setOpen] = useState(false);
   const [formData, setFormData] = useState<ScheduleItem>({
     duration: 0,
     description: "",
-    startTime: "",
+    startTimes: [],
     filmId: 0,
     roomId: 0,
     price: 0,
   });
+
+  const addStartTime = () => {
+    setStartTimes([...startTimes, { id: startTimes.length + 1, value: "" }]);
+  };
+
+  const removeStartTime = (id: number) => {
+    setStartTimes(startTimes.filter((time) => time.id !== id));
+  };
+
+  const handleTimeChange = (
+    id: number,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newStartTimes = startTimes.map((time) =>
+      time.id === id ? { ...time, value: event.target.value } : time
+    );
+    setStartTimes(newStartTimes);
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -292,8 +323,32 @@ const AddScheduleModal: React.FC<{
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const duration = hours * 60 + minutes;
+    if (duration <= 0) {
+      toast.error("Duration not valid");
+      return;
+    }
+
     if (
-      Object.values(formData).some(
+      startTimes.length === 0 ||
+      startTimes.some((time) => time.value.trim() === "")
+    ) {
+      toast.error("Start time not valid");
+      return;
+    }
+
+    const timesOnly = startTimes.map((time) => time.value);
+
+    const newFormData = {
+      ...formData,
+      duration: duration,
+      startTimes: timesOnly,
+    };
+
+    setFormData(newFormData);
+
+    if (
+      Object.values(newFormData).some(
         (value) =>
           (typeof value === "string" && value.trim() === "") ||
           value === null ||
@@ -304,18 +359,19 @@ const AddScheduleModal: React.FC<{
       return;
     }
     apiClient
-      .post(`/schedule`, JSON.stringify(formData))
+      .post(`/schedule/muli-time-slots`, JSON.stringify(newFormData))
       .then((response) => {
         refetchHandle();
         setOpen(false);
         setFormData({
           duration: 0,
           description: "",
-          startTime: "",
+          startTimes: "",
           filmId: 0,
           roomId: 0,
           price: 0,
         });
+        setStartTimes([{ id: 1, value: "" }]);
         toast.success("Add schedule successfully");
       })
       .catch((error: any) => {
@@ -354,12 +410,23 @@ const AddScheduleModal: React.FC<{
             </div>
             <div className="mb-3">
               <Label>Duration (minutes)</Label>
-              <TextInput
-                name="duration"
-                className="mt-1"
-                type="number"
-                onChange={handleChange}
-              />
+              <div className="flex gap-x-3 mt-1">
+                <TextInput
+                  className="w-[100px]"
+                  type="number"
+                  min="0"
+                  placeholder="Hours"
+                  onChange={(e) => setHours(parseInt(e.target.value))}
+                />
+                <TextInput
+                  className="w-[100px]"
+                  type="number"
+                  min="0"
+                  max="59"
+                  placeholder="Minutes"
+                  onChange={(e) => setMinutes(parseInt(e.target.value))}
+                />
+              </div>
             </div>
             <div className="mb-3">
               <Label>Description</Label>
@@ -372,12 +439,26 @@ const AddScheduleModal: React.FC<{
             <div className="mb-3">
               <Label>Start time</Label>
               <br />
-              <input
-                type="datetime-local"
-                onChange={handleChange}
-                className="rounded"
-                name="startTime"
-              />
+              {startTimes.map((time) => (
+                <div key={time.id}>
+                  <input
+                    type="datetime-local"
+                    value={time.value}
+                    onChange={(event) => handleTimeChange(time.id, event)}
+                    className="rounded my-3"
+                    name="startTime"
+                  />
+                  <button
+                    className="mx-5 text-red-500"
+                    onClick={() => removeStartTime(time.id)}
+                  >
+                    X
+                  </button>
+                </div>
+              ))}
+              <Button className="bg-sky-600 mt-3" onClick={addStartTime}>
+                Add time
+              </Button>
             </div>
             <div className="mb-3">
               <Label>Cinema</Label>
@@ -422,35 +503,37 @@ const ScheduleTable: React.FC<{
   currentRooms: RoomData[] | undefined;
   refetchHandle: () => void;
 }> = ({ scheduleApiResponse, currentRooms, refetchHandle }) => {
-  const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedSchedule, setSelectedSchedule] = useState<ScheduleItem | null>(
     null
   );
+  const [scheduleSeats, setScheduleSeats] = useState<any[]>([]);
   const calendarRef = useRef(null);
-  const handleEventClick = (info: any) => {
-    setSelectedEvent(info.event);
-    console.log(info.event._def.publicId);
+
+  const handleEventClick = async (info: any) => {
     setSelectedSchedule(getScheduleById(Number(info.event._def.publicId)));
+    const response = await apiClient.get(
+      `/schedule/${Number(info.event._def.publicId)}`
+    );
+    setScheduleSeats(response.data.data.scheduleSeats);
   };
+
   const resources = currentRooms?.map((room) => ({
     id: room.id || 0,
     title: room.name,
   }));
 
   const handleCloseModal = () => {
-    setSelectedEvent(null);
     setSelectedSchedule(null);
-    console.log(selectedEvent);
   };
 
-  function getRoomIdByName(
+  function getRoomByName(
     rooms: RoomData[] | undefined,
     targetRoomName: string | undefined
-  ): number | null {
+  ): RoomData | null {
     const foundRoom = rooms?.find((room) => room.name === targetRoomName);
 
     // If a room with the specified name is found, return its ID; otherwise, return null
-    return foundRoom ? foundRoom.id || null : null;
+    return foundRoom ? foundRoom || null : null;
   }
 
   function getScheduleById(scheduleId: number): ScheduleItem | null {
@@ -465,7 +548,7 @@ const ScheduleTable: React.FC<{
     title: schedule.film,
     start: schedule.startTime,
     end: schedule.endTime,
-    resourceId: getRoomIdByName(currentRooms, schedule.room),
+    resourceId: getRoomByName(currentRooms, schedule.room)?.id,
   }));
 
   const deleteHandle = () => {
@@ -481,7 +564,13 @@ const ScheduleTable: React.FC<{
       });
   };
 
+  const refetchSeats = async () => {
+    const response = await apiClient.get(`/schedule/${selectedSchedule?.id}`);
+    setScheduleSeats(response.data.data.scheduleSeats);
+  };
+
   const handleChange = () => {};
+
   return (
     <>
       <FullCalendar
@@ -496,7 +585,6 @@ const ScheduleTable: React.FC<{
         }}
         initialView="resourceTimelineDay"
         nowIndicator={true}
-        editable={true}
         selectable={true}
         selectMirror={true}
         events={events as EventSourceInput | undefined}
@@ -504,7 +592,7 @@ const ScheduleTable: React.FC<{
         //@ts-ignore
         resources={resources}
       />
-      <Modal show={!!selectedEvent} onClose={handleCloseModal}>
+      <Modal show={!!selectedSchedule} onClose={handleCloseModal}>
         <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
           <strong>Details</strong>
         </Modal.Header>
@@ -571,10 +659,26 @@ const ScheduleTable: React.FC<{
                 disabled
               />
             </div>
-            <div className="flex justify-center">
+
+            <div className="mt-5">
+              <Label className="text-md">Seats </Label>
+              <div className="mt-3 py-5 ">
+                {scheduleSeats && (
+                  <Seats
+                    seats={scheduleSeats}
+                    refetchSeats={refetchSeats}
+                    scheduleId={selectedSchedule?.id}
+                  />
+                )}
+              </div>
+            </div>
+
+            <hr className="w-full " />
+
+            <div className="flex justify-center ">
               <Button color="failure" onClick={deleteHandle} className="mt-8">
                 <HiTrash className="mr-2 text-lg" />
-                Delete
+                Delete schedule
               </Button>
             </div>
           </Modal.Body>
@@ -583,3 +687,182 @@ const ScheduleTable: React.FC<{
     </>
   );
 };
+
+const Seats: React.FC<{
+  seats: any[];
+  refetchSeats: () => void;
+  scheduleId: number | undefined;
+}> = ({ seats, refetchSeats, scheduleId }) => {
+  useEffect(() => {
+    if (seats.length > 0) {
+      setRows(constructRows(seats));
+    }
+  }, [seats]);
+
+  const constructRows = (seats: TSeat[]) => {
+    const rows: Record<string, TSeat[]> = {};
+
+    seats.forEach((seat) => {
+      if (!rows[seat.seatCode[0]]) {
+        rows[seat.seatCode[0]] = [];
+      }
+      rows[seat.seatCode[0]].push(seat);
+    });
+
+    console.log("rows ", rows);
+    return rows;
+  };
+
+  const [rows, setRows] = useState(constructRows(seats));
+  const [selectedSeats, setSelectedSeats] = useState<TSeat[]>([]);
+  const user = useUser();
+
+  const selectSeat = (seat: TSeat) => {
+    if (seat.status === 2 || seat.status === 3) {
+      return;
+    }
+
+    if (seat.status === 1) {
+      if (!selectedSeats.includes(seat)) {
+        setSelectedSeats([...selectedSeats, seat]);
+      } else {
+        setSelectedSeats(
+          selectedSeats.filter((selectedSeat) => selectedSeat !== seat)
+        );
+      }
+    }
+    console.log(selectedSeats);
+  };
+
+  const lockSeatHandler = async () => {
+    if (selectedSeats.length === 0) {
+      toast.error("Please select at least one seat");
+      return;
+    }
+    const confirmLock = window.confirm("Do you want to reserve these seats?");
+    if (confirmLock) {
+      try {
+        const numberSeats = selectedSeats.map((seat) => {
+          return seat.numberSeat;
+        });
+
+        const reserveData = {
+          numberSeats: numberSeats,
+          scheduleId: scheduleId,
+          customerId: user.user.userId,
+        };
+
+        await apiClient.post("/reserve", JSON.stringify(reserveData));
+
+        const bookingData = await apiClient.post(
+          "/booking",
+          JSON.stringify({ ...reserveData, paymentDestinationId: "VNPAY" })
+        );
+        console.log(bookingData);
+        refetchSeats();
+      } catch (error: any) {
+        toast.error(error.response.data.messages[0]);
+      }
+    }
+  };
+
+  if (Object.keys(rows).length > 0) {
+    return (
+      <>
+        <div className="flex justify-center">
+          <Button className="bg-sky-600" onClick={lockSeatHandler}>
+            Reserve seats
+          </Button>
+        </div>
+        <div className="flex justify-center mt-4 ">
+          <div className="px-10 space-y-2">
+            <div className="flex gap-8 mt-2">
+              <span className="text-black w-[20px] h-[20px]"></span>
+
+              <div className="flex gap-4">
+                {Array(rows[Object.keys(rows)[0]].length)
+                  .fill(0)
+                  .map((v, index) => {
+                    return (
+                      <span
+                        className="w-[20px] h-[20px] text-center"
+                        key={index}
+                      >
+                        {index + 1}
+                      </span>
+                    );
+                  })}
+              </div>
+            </div>
+
+            {Object.keys(rows).map((row) => {
+              if (!row) {
+                return <div key={"empty_row"} className="h-[20px]"></div>;
+              }
+
+              return (
+                <div className="flex gap-8 mt-2" key={row}>
+                  <span className="text-black w-[20px]">{row}</span>
+
+                  <div className="flex gap-4">
+                    {rows[row].map((seat: TSeat) => {
+                      if (!seat) {
+                        return (
+                          <div
+                            key={"empty_seat"}
+                            className="w-[20px] h-[20px]"
+                          ></div>
+                        );
+                      }
+                      return (
+                        <Seat
+                          key={seat.id}
+                          seat={seat}
+                          selectSeat={() => selectSeat(seat)}
+                          selectedSeats={selectedSeats}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </>
+    );
+  }
+};
+
+function Seat({
+  seat,
+  selectSeat,
+  selectedSeats,
+}: {
+  seat: TSeat;
+  selectSeat: () => void;
+  selectedSeats: TSeat[];
+}) {
+  const isSelected = selectedSeats.includes(seat);
+  return (
+    <div>
+      <div
+        onClick={() => selectSeat()}
+        role={"button"}
+        className={`w-[20px] h-[20px]  rounded-b-xl rounded-t border-2  
+        hover:bg-green-300
+        ${
+          (seat.status === 2 || seat.status === 3) &&
+          "bg-red-500 border-red-500 hover:bg-red-500"
+        }
+        ${
+          isSelected &&
+          seat.status === 1 &&
+          "bg-green-500 border-green-500 hover:bg-green-400"
+        }
+        border-black/30
+      `}
+      ></div>
+    </div>
+  );
+}
