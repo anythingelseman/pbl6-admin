@@ -758,8 +758,17 @@ const Seats: React.FC<{
           "/booking",
           JSON.stringify({ ...reserveData, paymentDestinationId: "VNPAY" })
         );
-        console.log(bookingData);
+        console.log(bookingData.data.data.id);
+        await apiClient.patch(
+          "/booking/update-status",
+          JSON.stringify({
+            id: bookingData.data.data.id,
+            bookingStatus: 3,
+          })
+        );
+        setSelectedSeats([]);
         refetchSeats();
+        toast.success("Reserve seats successfully");
       } catch (error: any) {
         toast.error(error.response.data.messages[0]);
       }
