@@ -498,13 +498,13 @@ const EditProductModal: React.FC<{
     const response = await apiClient.get(`/cinema/${cinemaId}`);
     const data = await response.data.data;
     setApiImages(data.listImage);
-    console.log("data cinema: ", data);
     const transformedArray = data.listImage.map((link: string) => {
-      const parts = link.split("/");
-      const fileName = parts[parts.length - 1];
-
-      return fileName;
+      const url = new URL(link);
+      const pathname = url.pathname;
+      return pathname.startsWith("/") ? pathname.substring(1) : pathname;
     });
+    console.log(data.listImage);
+    console.log("transformedArray: ", transformedArray);
 
     setFormData({
       id: data.id,
@@ -514,6 +514,8 @@ const EditProductModal: React.FC<{
       address: data.address,
       city: data.city,
       listImage: transformedArray,
+      longitude: data.longitude,
+      latitude: data.latitude,
     });
     return data;
   };
@@ -594,7 +596,7 @@ const EditProductModal: React.FC<{
         .then((result) => {
           setOpen(false);
           handleRefetch();
-          toast.success("Edit film successfully");
+          toast.success("Edit cinema successfully");
         })
         .catch((error) => {
           toast.error(error.response.data.messages[0]);

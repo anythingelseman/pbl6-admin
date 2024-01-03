@@ -177,6 +177,7 @@ const AddPosterModal: React.FC<{
       ...formData,
       [name]: value,
     });
+    console.log(formData);
   };
 
   const customAfter = (event: any) => {

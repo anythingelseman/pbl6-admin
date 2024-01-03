@@ -289,7 +289,7 @@ const Pagination: React.FC<PaginationComponentProps> = ({
           categoryData?.currentPage - 1
         }&OrderBy=id`
       );
-      const data = response.data();
+      const data = response.data;
       setCategoryData(data);
       console.log(data);
     } catch (error) {

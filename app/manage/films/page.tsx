@@ -585,8 +585,11 @@ const EditProductModal: React.FC<{
     setApiImages(data.image);
 
     const transformedArray = data.image.map((link: string) => {
-      const parts = link.split("/");
-      const fileName = parts[parts.length - 1];
+      const url = new URL(link);
+      const pathname = url.pathname;
+      const fileName = pathname.startsWith("/")
+        ? pathname.substring(1)
+        : pathname;
 
       return {
         nameFile: fileName,
