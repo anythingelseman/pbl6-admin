@@ -105,10 +105,9 @@ export default function CustomerPage() {
 
         {!isLoading && customers && (
           <div className="border-[3px] border-black rounded-md py-2 mt-8">
-            <div className="grid grid-cols-12 mt-4">
-              <div className="col-span-1 text-center">#</div>
-              <div className="col-span-2 text-center">Tên</div>
-              <div className="col-span-2 text-center">Email</div>
+            <div className="grid grid-cols-12 gap-4 mt-4">
+              <div className="col-span-2 text-center ">Tên</div>
+              <div className="col-span-3 text-center">Email</div>
               <div className="col-span-2 text-center">Số điện thoại</div>
               <div className="col-span-3 text-center">Địa chỉ</div>
               <div className="col-span-2 text-center">Ngày sinh</div>
@@ -177,7 +176,7 @@ const CustomerRow = ({
 
     const formattedDate = new Date(dateString).toLocaleDateString(
       undefined,
-      options,
+      options
     );
     return formattedDate;
   };
@@ -236,15 +235,37 @@ const CustomerRow = ({
         onClick={() => setOpenModal(true)}
       >
         <div
-          className="grid grid-cols-12 border-t-[2px] border-black/50 items-center py-4"
+          className="grid grid-cols-12 border-t-[2px] border-black/50 items-center py-4 gap-4"
           key={customer.id}
         >
-          <div className="col-span-1 text-center">{index}</div>
-          <div className="col-span-2 text-center">{customer.customerName}</div>
-          <div className="col-span-2 text-center">{customer.email}</div>
-          <div className="col-span-2 text-center">{customer.phoneNumber}</div>
-          <div className="col-span-3 text-center">{customer.address}</div>
-          <div className="col-span-2 text-center">
+          <div
+            className="col-span-2 text-center"
+            style={{ wordWrap: "break-word" }}
+          >
+            {customer.customerName}
+          </div>
+          <div
+            className="col-span-3 text-center"
+            style={{ wordWrap: "break-word" }}
+          >
+            {customer.email}
+          </div>
+          <div
+            className="col-span-2 text-center"
+            style={{ wordWrap: "break-word" }}
+          >
+            {customer.phoneNumber}
+          </div>
+          <div
+            className="col-span-3 text-center"
+            style={{ wordWrap: "break-word" }}
+          >
+            {customer.address}
+          </div>
+          <div
+            className="col-span-2 text-center"
+            style={{ wordWrap: "break-word" }}
+          >
             {formatDate(customer.dateOfBirth)}
           </div>
         </div>
