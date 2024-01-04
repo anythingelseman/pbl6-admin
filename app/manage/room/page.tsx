@@ -138,25 +138,25 @@ export default function RoomPage() {
         <div className="mb-1 w-full">
           <div className="mb-4">
             <h1 className="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
-              Room
+              Phòng
             </h1>
           </div>
           <div className="block items-center sm:flex">
             <div className="mb-4 sm:mb-0 sm:pr-3 ">
               <Label htmlFor="search" className="sr-only">
-                Search
+                Tìm kiếm
               </Label>
-              <div className="relative mt-1 lg:w-64 xl:w-96 flex gap-x-3">
+              <div className="relative mt-1  flex gap-x-3">
                 <TextInput
                   className="w-[400px]"
                   id="search"
                   name="search"
-                  placeholder="Name search "
+                  placeholder="Tìm kiếm theo tên "
                   value={searchTerm}
                   onChange={changeHandle}
                 />
-                <Button className="bg-sky-600" onClick={searchHandle}>
-                  Search
+                <Button className="bg-sky-600 w-[100px]" onClick={searchHandle}>
+                  Tìm kiếm
                 </Button>
               </div>
             </div>
@@ -210,10 +210,24 @@ const AddRoomModal: React.FC<{
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: name === "name" ? value : Number(value), // Convert to number for ID
-    });
+    if (name === "numberRow") {
+      setFormData({
+        ...formData,
+        numberSeat: Number(value) * Number(formData.numberColumn),
+        numberRow: Number(value),
+      });
+    } else if (name === "numberColumn") {
+      setFormData({
+        ...formData,
+        numberSeat: Number(value) * Number(formData.numberRow),
+        numberColumn: Number(value),
+      });
+    } else
+      setFormData({
+        ...formData,
+        [name]: name === "name" ? value : Number(value), // Convert to number for ID
+      });
+
     console.log(formData);
   };
 
@@ -227,7 +241,7 @@ const AddRoomModal: React.FC<{
           value === undefined
       )
     ) {
-      toast.error("Please fill in all the fields");
+      toast.error("Hãy điên đầy đủ thông tin");
       return;
     }
     apiClient
@@ -243,7 +257,7 @@ const AddRoomModal: React.FC<{
           numberRow: 0,
           numberColumn: 0,
         });
-        toast.success("Add room successfully");
+        toast.success("Thêm phòng thành công");
       })
       .catch((error) => {
         toast.error(error.response.data.messages[0]);
@@ -254,7 +268,7 @@ const AddRoomModal: React.FC<{
     <>
       <Button className="bg-sky-600" onClick={() => setOpen(!isOpen)}>
         <FaPlus className="mr-3 text-sm" />
-        Add room
+        Thêm phòng
       </Button>
       <Modal
         onClose={() => {
@@ -263,15 +277,15 @@ const AddRoomModal: React.FC<{
         show={isOpen}
       >
         <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
-          <strong>Add </strong>
+          <strong>Thêm phòng </strong>
         </Modal.Header>
         <form onSubmit={handleSubmit} className="bg-white">
           <Modal.Body>
             <div>
-              <Label>Name</Label>
+              <Label>Tên</Label>
               <TextInput name="name" className="mt-1" onChange={handleChange} />
             </div>
-            <div>
+            {/* <div>
               <Label>Number of seats</Label>
               <TextInput
                 type="number"
@@ -279,9 +293,9 @@ const AddRoomModal: React.FC<{
                 className="mt-1"
                 onChange={handleChange}
               />
-            </div>
+            </div> */}
             <div className="mt-3 flex max-w-md flex-col gap-4">
-              <Label className="text-md">Status</Label>
+              <Label className="text-md">Trạng thái</Label>
               <div className="flex items-center gap-2">
                 <Radio
                   id="available"
@@ -290,7 +304,7 @@ const AddRoomModal: React.FC<{
                   defaultChecked
                   onChange={handleChange}
                 />
-                <Label htmlFor="available">Available</Label>
+                <Label htmlFor="available">Có sẵn</Label>
               </div>
               <div className="flex items-center gap-2">
                 <Radio
@@ -299,11 +313,11 @@ const AddRoomModal: React.FC<{
                   value="0"
                   onChange={handleChange}
                 />
-                <Label htmlFor="close">Close</Label>
+                <Label htmlFor="close">Đóng cửa</Label>
               </div>
             </div>
             <div className="mb-3 mt-3">
-              <Label>Number of row</Label>
+              <Label>Số hàng</Label>
               <TextInput
                 type="number"
                 name="numberRow"
@@ -312,7 +326,7 @@ const AddRoomModal: React.FC<{
               />
             </div>
             <div className="mb-3">
-              <Label>Number of column</Label>
+              <Label>Số cột</Label>
               <TextInput
                 type="number"
                 name="numberColumn"
@@ -326,7 +340,7 @@ const AddRoomModal: React.FC<{
               </div>
               <Select name="cinemaId" onChange={handleChange} required>
                 <option selected value="">
-                  Select cinema
+                  Chọn rạp
                 </option>
                 {cinemaData?.map((cinema) => (
                   <option key={cinema.id} value={cinema.id}>
@@ -338,7 +352,7 @@ const AddRoomModal: React.FC<{
           </Modal.Body>
           <Modal.Footer>
             <Button className="bg-sky-600" type="submit">
-              Add
+              Thêm phòng
             </Button>
           </Modal.Footer>
         </form>
@@ -368,10 +382,24 @@ const EditProductModal: React.FC<{
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: name === "name" ? value : Number(value), // Convert to number for ID
-    });
+    if (name === "numberRow") {
+      setFormData({
+        ...formData,
+        numberSeat: Number(value) * Number(formData.numberColumn),
+        numberRow: Number(value),
+      });
+    } else if (name === "numberColumn") {
+      setFormData({
+        ...formData,
+        numberSeat: Number(value) * Number(formData.numberRow),
+        numberColumn: Number(value),
+      });
+    } else
+      setFormData({
+        ...formData,
+        [name]: name === "name" ? value : Number(value), // Convert to number for ID
+      });
+
     console.log(formData);
   };
 
@@ -385,7 +413,7 @@ const EditProductModal: React.FC<{
           value === undefined
       )
     ) {
-      toast.error("Please fill in all the fields");
+      toast.error("Hãy điền đẩy đủ thông tin");
       return;
     }
     apiClient
@@ -393,7 +421,7 @@ const EditProductModal: React.FC<{
       .then((response) => {
         setOpen(false);
         handleRefetch();
-        toast.success("Edit room successfully");
+        toast.success("Chỉnh sửa phòng thành công");
       })
       .catch((error) => {
         toast.error(error.response.data.messages[0]);
@@ -404,7 +432,7 @@ const EditProductModal: React.FC<{
     <>
       <Button className="bg-sky-600" onClick={() => setOpen(!isOpen)}>
         <HiPencilAlt className="mr-2 text-lg" />
-        Edit
+        Sửa
       </Button>
       <Modal
         onClose={() => {
@@ -413,12 +441,12 @@ const EditProductModal: React.FC<{
         show={isOpen}
       >
         <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
-          <strong>Edit </strong>
+          <strong>Chỉnh sửa phòng </strong>
         </Modal.Header>
         <form onSubmit={handleSubmit} className="bg-white">
           <Modal.Body>
             <div>
-              <Label>Name</Label>
+              <Label>Tên</Label>
               <TextInput
                 name="name"
                 className="mt-1"
@@ -426,7 +454,7 @@ const EditProductModal: React.FC<{
                 value={formData.name}
               />
             </div>
-            <div>
+            {/* <div>
               <Label>Number of seats</Label>
               <TextInput
                 type="number"
@@ -435,9 +463,9 @@ const EditProductModal: React.FC<{
                 onChange={handleChange}
                 value={formData.numberSeat}
               />
-            </div>
+            </div> */}
             <div className="mt-3 flex max-w-md flex-col gap-4">
-              <Label className="text-md">Status</Label>
+              <Label className="text-md">Trạng thái</Label>
               <div className="flex items-center gap-2">
                 <Radio
                   id="available"
@@ -446,7 +474,7 @@ const EditProductModal: React.FC<{
                   checked={formData?.status == 1}
                   onChange={handleChange}
                 />
-                <Label htmlFor="available">Available</Label>
+                <Label htmlFor="available">Có sẵn</Label>
               </div>
               <div className="flex items-center gap-2">
                 <Radio
@@ -456,11 +484,11 @@ const EditProductModal: React.FC<{
                   checked={formData?.status == 0}
                   onChange={handleChange}
                 />
-                <Label htmlFor="close">Close</Label>
+                <Label htmlFor="close">Đóng cửa</Label>
               </div>
             </div>
             <div className="mb-3 mt-3">
-              <Label>Number of row</Label>
+              <Label>Số hàng</Label>
               <TextInput
                 type="number"
                 name="numberRow"
@@ -470,7 +498,7 @@ const EditProductModal: React.FC<{
               />
             </div>
             <div className="mb-3">
-              <Label>Number of column</Label>
+              <Label>Số cột</Label>
               <TextInput
                 type="number"
                 name="numberColumn"
@@ -481,7 +509,7 @@ const EditProductModal: React.FC<{
             </div>
             <div>
               <div className="mb-2 block">
-                <Label value="Select the cinema" />
+                <Label value="Chọn rạp" />
               </div>
               <Select
                 name="cinemaId"
@@ -499,7 +527,7 @@ const EditProductModal: React.FC<{
           </Modal.Body>
           <Modal.Footer>
             <Button className="bg-sky-600" type="submit">
-              Update
+              Chỉnh sửa
             </Button>
           </Modal.Footer>
         </form>
@@ -519,7 +547,7 @@ const DeleteProductModal: React.FC<{
       .delete(`/Room?Id=${roomId}`)
       .then((response) => {
         handleRefetch();
-        toast.success("Delete room successfully");
+        toast.success("Xóa phòng thành công");
       })
       .catch((error) => {
         toast.error(error.response.data.messages[0]);
@@ -530,24 +558,24 @@ const DeleteProductModal: React.FC<{
     <>
       <Button color="failure" onClick={() => setOpen(!isOpen)}>
         <HiTrash className="mr-2 text-lg" />
-        Delete
+        Xóa
       </Button>
       <Modal onClose={() => setOpen(false)} show={isOpen} size="md">
         <Modal.Header className="px-3 pt-3 pb-0 text-center">
-          <span>Delete product</span>
+          <span>Xóa phòng</span>
         </Modal.Header>
         <Modal.Body className="px-6 pb-6 pt-0">
           <div className="flex flex-col items-center gap-y-6 text-center">
             <HiOutlineExclamationCircle className="text-7xl text-red-600" />
             <p className="text-lg text-gray-500 dark:text-gray-300">
-              Are you sure you want to delete this room?
+              Bạn có muốn xóa phòng này không ?
             </p>
             <div className="flex items-center gap-x-3">
               <Button color="failure" onClick={deleteHandle}>
-                Yes, Im sure
+                Có
               </Button>
               <Button color="gray" onClick={() => setOpen(false)}>
-                No, cancel
+                Không
               </Button>
             </div>
           </div>
@@ -571,13 +599,13 @@ const RoomTable: React.FC<{
   return (
     <Table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
       <Table.Head className="bg-gray-100 dark:bg-gray-700">
-        <Table.HeadCell>Name</Table.HeadCell>
-        <Table.HeadCell>Number of seats</Table.HeadCell>
-        <Table.HeadCell>Status</Table.HeadCell>
-        <Table.HeadCell>Cinema</Table.HeadCell>
-        <Table.HeadCell>Row</Table.HeadCell>
-        <Table.HeadCell>Column</Table.HeadCell>
-        <Table.HeadCell>Action</Table.HeadCell>
+        <Table.HeadCell>Tên</Table.HeadCell>
+        <Table.HeadCell>Số ghế</Table.HeadCell>
+        <Table.HeadCell>Trạng thái</Table.HeadCell>
+        <Table.HeadCell>Rạp</Table.HeadCell>
+        <Table.HeadCell>Số hàng</Table.HeadCell>
+        <Table.HeadCell>Số cột</Table.HeadCell>
+        <Table.HeadCell>Các thao tác</Table.HeadCell>
       </Table.Head>
       <Table.Body className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
         {roomApiResponse?.data &&
@@ -613,7 +641,7 @@ const RoomRow: React.FC<{
         {data?.numberSeat}
       </Table.Cell>
       <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 ">
-        {data?.status === 1 ? "Available" : "Close"}
+        {data?.status === 1 ? "Có sẵn" : "Đóng cửa"}
       </Table.Cell>
       <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 ">
         {cinemaName}
@@ -687,16 +715,16 @@ const Pagination: React.FC<PaginationComponentProps> = ({
         } `}
       >
         <HiChevronLeft className="text-2xl" />
-        <span>Previous </span>
+        <span>Trang trước </span>
       </button>
 
       <div>
         <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-          Showing page&nbsp;
+          Trang&nbsp;
           <span className="font-semibold text-gray-900 dark:text-white">
             {roomApiResponse?.currentPage}
           </span>
-          &nbsp;of&nbsp;
+          &nbsp;trên&nbsp;
           <span className="font-semibold text-gray-900 dark:text-white">
             {roomApiResponse?.totalPages}
           </span>
@@ -712,7 +740,7 @@ const Pagination: React.FC<PaginationComponentProps> = ({
             : "cursor-default"
         } `}
       >
-        <span>Next</span>
+        <span>Trang sau</span>
         <HiChevronRight className="text-2xl" />
       </button>
     </div>

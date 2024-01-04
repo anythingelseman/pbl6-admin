@@ -113,25 +113,25 @@ export default function EmployeePage() {
         <div className="mb-1 w-full">
           <div className="mb-4">
             <h1 className="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
-              Employee
+              Nhân viên
             </h1>
           </div>
           <div className="block items-center sm:flex">
             <div className="mb-4 sm:mb-0 sm:pr-3 ">
               <Label htmlFor="search" className="sr-only">
-                Search
+                Tìm kiếm
               </Label>
-              <div className="relative mt-1 lg:w-64 xl:w-96 flex gap-x-3">
+              <div className="relative mt-1  flex gap-x-3">
                 <TextInput
                   className="w-[400px]"
                   id="search"
                   name="search"
-                  placeholder="Name search "
+                  placeholder="Tìm kiếm theo tên "
                   value={searchTerm}
                   onChange={changeHandle}
                 />
-                <Button className="bg-sky-600" onClick={searchHandle}>
-                  Search
+                <Button className="bg-sky-600 w-[100px]" onClick={searchHandle}>
+                  Tìm kiếm
                 </Button>
               </div>
             </div>
@@ -207,7 +207,7 @@ const AddEmployeeModal: React.FC<{
           value === undefined
       )
     ) {
-      toast.error("Please fill in all the fields");
+      toast.error("Hãy điền đầy đủ thông tin");
       return;
     }
     apiClient
@@ -216,7 +216,7 @@ const AddEmployeeModal: React.FC<{
         handleRefetch();
         setOpen(false);
         setFormData(initialData);
-        toast.success("Add employee successfully");
+        toast.success("Thêm nhân viên thành công");
       })
       .catch((error: any) => {
         toast.error(error.response.data.messages[0]);
@@ -227,7 +227,7 @@ const AddEmployeeModal: React.FC<{
     <>
       <Button className="bg-sky-600" onClick={() => setOpen(!isOpen)}>
         <FaPlus className="mr-3 text-sm" />
-        Add employee
+        Thêm nhân viên
       </Button>
       <Modal
         onClose={() => {
@@ -236,16 +236,16 @@ const AddEmployeeModal: React.FC<{
         show={isOpen}
       >
         <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
-          <strong>Add </strong>
+          <strong>Thêm nhân viên </strong>
         </Modal.Header>
         <form onSubmit={handleSubmit} className="bg-white">
           <Modal.Body>
             <div>
-              <Label className="text-md">Name</Label>
+              <Label className="text-md">Tên</Label>
               <TextInput name="name" className="mt-1" onChange={handleChange} />
             </div>
             <div className="mt-2">
-              <Label className="text-md">Address</Label>
+              <Label className="text-md">Địa chỉ</Label>
               <TextInput
                 name="address"
                 className="mt-1"
@@ -253,7 +253,7 @@ const AddEmployeeModal: React.FC<{
               />
             </div>
             <div className="mt-3">
-              <Label className="text-md">Birthday</Label>
+              <Label className="text-md">Ngày sinh</Label>
               <br />
               <input
                 type="date"
@@ -274,7 +274,7 @@ const AddEmployeeModal: React.FC<{
             </div>
 
             <div className="mt-2">
-              <Label className="text-md">Phone number</Label>
+              <Label className="text-md">Số điện thoại</Label>
               <TextInput
                 name="phoneNumber"
                 className="mt-1"
@@ -283,7 +283,7 @@ const AddEmployeeModal: React.FC<{
             </div>
 
             <div className="mt-3 flex max-w-md flex-col gap-4">
-              <Label className="text-md">Gender</Label>
+              <Label className="text-md">Giới tính</Label>
               <div className="flex items-center gap-2">
                 <Radio
                   id="male"
@@ -292,7 +292,7 @@ const AddEmployeeModal: React.FC<{
                   defaultChecked
                   onChange={handleChange}
                 />
-                <Label htmlFor="male">Male</Label>
+                <Label htmlFor="male">Nam</Label>
               </div>
               <div className="flex items-center gap-2">
                 <Radio
@@ -301,12 +301,12 @@ const AddEmployeeModal: React.FC<{
                   value="false"
                   onChange={handleChange}
                 />
-                <Label htmlFor="female">Female</Label>
+                <Label htmlFor="female">Nữ</Label>
               </div>
             </div>
 
             <div className="mt-2">
-              <Label className="text-md">Username</Label>
+              <Label className="text-md">Tên đăng nhập</Label>
               <TextInput
                 name="username"
                 className="mt-1"
@@ -315,7 +315,7 @@ const AddEmployeeModal: React.FC<{
             </div>
 
             <div className="mt-2">
-              <Label className="text-md">Password</Label>
+              <Label className="text-md">Mật khẩu</Label>
               <TextInput
                 name="password"
                 className="mt-1"
@@ -324,7 +324,7 @@ const AddEmployeeModal: React.FC<{
             </div>
 
             <div className="mt-3 flex max-w-md flex-col gap-4">
-              <Label className="text-md">Role</Label>
+              <Label className="text-md">Vị trí</Label>
               <div className="flex items-center gap-2">
                 <Radio
                   id="admin"
@@ -342,13 +342,13 @@ const AddEmployeeModal: React.FC<{
                   value="false"
                   onChange={handleChange}
                 />
-                <Label htmlFor="employee">Employee</Label>
+                <Label htmlFor="employee">Nhân viên</Label>
               </div>
             </div>
           </Modal.Body>
           <Modal.Footer>
             <Button className="bg-sky-600" type="submit" id="Add-button">
-              Add
+              Thêm
             </Button>
           </Modal.Footer>
         </form>
@@ -369,7 +369,7 @@ const DeleteProductModal: React.FC<{
 
       .then((response) => {
         handleRefetch();
-        toast.success("Delete employee successfully");
+        toast.success("Xóa nhân viên thành công");
       })
       .catch((error) => {
         toast.error(error.response.data.messages[0]);
@@ -380,24 +380,24 @@ const DeleteProductModal: React.FC<{
     <>
       <Button color="failure" onClick={() => setOpen(!isOpen)}>
         <HiTrash className="mr-2 text-lg" />
-        Delete
+        Xóa
       </Button>
       <Modal onClose={() => setOpen(false)} show={isOpen} size="md">
         <Modal.Header className="px-3 pt-3 pb-0 text-center">
-          <span>Delete product</span>
+          <span>Xóa nhân viên</span>
         </Modal.Header>
         <Modal.Body className="px-6 pb-6 pt-0">
           <div className="flex flex-col items-center gap-y-6 text-center">
             <HiOutlineExclamationCircle className="text-7xl text-red-600" />
             <p className="text-lg text-gray-500 dark:text-gray-300">
-              Are you sure you want to delete this employee?
+              Bạn có muốn xóa nhân viên này không ?
             </p>
             <div className="flex items-center gap-x-3">
               <Button color="failure" onClick={deleteHandle}>
-                Yes, Im sure
+                Có
               </Button>
               <Button color="gray" onClick={() => setOpen(false)}>
-                No, cancel
+                Không
               </Button>
             </div>
           </div>
@@ -414,11 +414,11 @@ const EmployeeTable: React.FC<{
   return (
     <Table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
       <Table.Head className="bg-gray-100 dark:bg-gray-700">
-        <Table.HeadCell>Name</Table.HeadCell>
-        <Table.HeadCell>Gender</Table.HeadCell>
-        <Table.HeadCell>Phone Number</Table.HeadCell>
+        <Table.HeadCell>Tên</Table.HeadCell>
+        <Table.HeadCell>Giới tính</Table.HeadCell>
+        <Table.HeadCell>Số điện thoại</Table.HeadCell>
         <Table.HeadCell>Email</Table.HeadCell>
-        <Table.HeadCell>Action</Table.HeadCell>
+        <Table.HeadCell>Các thao tác</Table.HeadCell>
       </Table.Head>
       <Table.Body className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
         {employeeApiResponse?.data &&
@@ -517,16 +517,16 @@ const Pagination: React.FC<PaginationComponentProps> = ({
         } `}
       >
         <HiChevronLeft className="text-2xl" />
-        <span>Previous </span>
+        <span>Trang trước </span>
       </button>
 
       <div>
         <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-          Showing page&nbsp;
+          Trang&nbsp;
           <span className="font-semibold text-gray-900 dark:text-white">
             {employeeApiResponse?.currentPage}
           </span>
-          &nbsp;of&nbsp;
+          &nbsp;trên&nbsp;
           <span className="font-semibold text-gray-900 dark:text-white">
             {employeeApiResponse?.totalPages}
           </span>
@@ -542,7 +542,7 @@ const Pagination: React.FC<PaginationComponentProps> = ({
             : "cursor-default"
         } `}
       >
-        <span>Next</span>
+        <span>Trang sau</span>
         <HiChevronRight className="text-2xl" />
       </button>
     </div>

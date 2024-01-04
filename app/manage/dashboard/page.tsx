@@ -75,16 +75,16 @@ export default function DashBoard() {
             id="countries"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           >
-            <option value={0}>Daily</option>
-            <option value={1}>Weekly</option>
-            <option value={2}>Monthly</option>
-            <option value={3}>Yearly</option>
+            <option value={0}>Hàng ngày</option>
+            <option value={1}>Hàng tuần</option>
+            <option value={2}>Hàng tháng</option>
+            <option value={3}>Hàng năm</option>
           </select>
         </div>
 
         <div className="flex gap-2 items-center">
           <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-            Cinema
+            Rạp
           </label>
           <select
             onChange={(e) => setCinema(Number(e.target.value))}
@@ -92,7 +92,7 @@ export default function DashBoard() {
             id="countries"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           >
-            <option value={-1}>All cinemas</option>
+            <option value={-1}>Tất cả rạp</option>
             {cinemas &&
               cinemas.map((cinema) => {
                 return (
@@ -108,14 +108,14 @@ export default function DashBoard() {
       {!isLoading && overview ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
           <CardDataStats
-            title="Total Revenue"
+            title="Tổng doanh thu"
             total={`${overview.currPrdTotalRevenue}`}
             rate={
               overview.prevPrdTotalRevenue
                 ? `${Math.abs(
                     (overview.currPrdTotalRevenue -
                       overview.prevPrdTotalRevenue) /
-                      Math.max(1, overview.prevPrdTotalRevenue),
+                      Math.max(1, overview.prevPrdTotalRevenue)
                   ).toFixed(2)}%`
                 : ""
             }
@@ -145,14 +145,14 @@ export default function DashBoard() {
             </svg>
           </CardDataStats>
           <CardDataStats
-            title="Total Ticket"
+            title="Tổng số vé"
             total={`${overview.currPrdTotalTickets}`}
             rate={
               overview.prevPrdTotalTickets
                 ? `${Math.abs(
                     (overview.currPrdTotalTickets -
                       overview.prevPrdTotalTickets) /
-                      Math.max(1, overview.prevPrdTotalRevenue),
+                      Math.max(1, overview.prevPrdTotalRevenue)
                   ).toFixed(2)}%`
                 : ""
             }
@@ -186,14 +186,14 @@ export default function DashBoard() {
             </svg>
           </CardDataStats>
           <CardDataStats
-            title="Total Bookings"
+            title="Tổng lượt đặt"
             total={`${overview.currPrdTotalBookings}`}
             rate={
               overview.prevPrdTotalBookings
                 ? `${Math.abs(
                     (overview.currPrdTotalBookings -
                       overview.prevPrdTotalBookings) /
-                      Math.max(1, overview.prevPrdTotalBookings),
+                      Math.max(1, overview.prevPrdTotalBookings)
                   ).toFixed(2)}%`
                 : ""
             }
@@ -223,13 +223,13 @@ export default function DashBoard() {
             </svg>
           </CardDataStats>
           <CardDataStats
-            title="Total Schedules"
+            title="Số lịch chiếu"
             total={`${overview.currPrdSchedules}`}
             rate={
               overview.prevPrdSchedules
                 ? `${Math.abs(
                     (overview.currPrdSchedules - overview.prevPrdSchedules) /
-                      Math.max(1, overview.prevPrdSchedules),
+                      Math.max(1, overview.prevPrdSchedules)
                   ).toFixed(2)}%`
                 : ""
             }

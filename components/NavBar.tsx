@@ -34,17 +34,17 @@ export default function NavBar() {
       <div className="flex md:order-2 text-white">
         <Dropdown
           inline
-          label={<h1>Hello, {user?.employeeNo}</h1>}
+          label={<h1>Xin chào, {user?.employeeNo}</h1>}
           className="bg-slate-900 border-current"
         >
           <Dropdown.Header>
             <span className="block text-sm text-white">{user?.email}</span>
             <span className="block truncate text-sm font-medium text-white">
-              Role: {user?.role}
+              Vị trí: {user?.role}
             </span>
           </Dropdown.Header>
           <Dropdown.Item className="text-white" onClick={logoutHandler}>
-            Log out
+            Đăng xuất
           </Dropdown.Item>
         </Dropdown>
         <Navbar.Toggle />

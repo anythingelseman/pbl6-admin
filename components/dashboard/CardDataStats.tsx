@@ -23,16 +23,18 @@ export const CardDataStats: React.FC<CardDataStatsProps> = ({
         {children}
       </div>
 
-      <div className="mt-4 flex items-end justify-between">
+      <div className="mt-4 flex items-center gap-x-3 justify-between">
         <div>
-          <h4 className="text-title-md font-bold text-black dark:text-white">{total}</h4>
+          <h4 className="text-title-md font-bold text-black dark:text-white">
+            {total}
+          </h4>
           <span className="text-sm font-medium">{title}</span>
         </div>
 
         <span
-          className={`flex items-center gap-1 text-sm font-medium ${levelUp && "text-[#10b981]"} ${
-            levelDown && "text-[#259ae6]"
-          } `}
+          className={`flex items-center gap-1 text-sm font-medium ${
+            levelUp && "text-[#10b981]"
+          } ${levelDown && "text-[#259ae6]"} `}
         >
           {rate}
 

@@ -47,6 +47,7 @@ interface FilmData {
   createdOn?: string; // This should be a valid date string format
   lastModifiedOn?: string; // This should be a valid date string format
   poster?: string;
+  enable?: boolean;
 }
 
 interface FilmApiResponse {
@@ -149,25 +150,25 @@ export default function FilmsPage() {
         <div className="mb-1 w-full">
           <div className="mb-4">
             <h1 className="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
-              Films
+              Phim
             </h1>
           </div>
           <div className="block items-center sm:flex">
             <div className="mb-4 sm:mb-0 sm:pr-3 ">
               <Label htmlFor="search" className="sr-only">
-                Search
+                Tìm kiếm
               </Label>
-              <div className="relative mt-1 lg:w-64 xl:w-96 flex gap-x-3">
+              <div className="relative mt-1 flex gap-x-3">
                 <TextInput
                   className="w-[400px]"
                   id="search"
                   name="search"
-                  placeholder="Name search "
+                  placeholder="Tìm kiếm theo tên "
                   value={searchTerm}
                   onChange={changeHandle}
                 />
-                <Button className="bg-sky-600" onClick={searchHandle}>
-                  Search
+                <Button className="bg-sky-600 w-[100px]" onClick={searchHandle}>
+                  Tìm kiếm
                 </Button>
               </div>
             </div>
@@ -277,16 +278,16 @@ const AddProductModal: React.FC<{
     e.preventDefault();
     console.log(formData);
     if (uploadImages.length === 0) {
-      toast.error("Please select images.");
+      toast.error("Làm ơn chọn ảnh.");
       return;
     }
 
     if (formData.startDate === "" || formData.endDate === "") {
-      toast.error("Please select dates.");
+      toast.error("Làm ơn chọn ngày.");
       return;
     }
     if (new Date(formData.startDate) > new Date(formData.endDate)) {
-      toast.error("End date is ealier than start date.");
+      toast.error("Ngày kết thúc phải sau ngày bắt đầu.");
       return;
     }
 
@@ -298,7 +299,7 @@ const AddProductModal: React.FC<{
             (value === null || value === undefined || value === 0))
       )
     ) {
-      toast.error("Please fill in all the fields");
+      toast.error("Hãy điền đầy đủ thông tin.");
       return;
     }
 
@@ -331,7 +332,7 @@ const AddProductModal: React.FC<{
       .then((result) => {
         handleRefetch();
         setFormData(initialValue);
-        toast.success("Add film successfully");
+        toast.success("Thêm phim thành công");
       })
       .catch((error) => {
         toast.error(error.response.data.messages[0]);
@@ -342,17 +343,17 @@ const AddProductModal: React.FC<{
     <>
       <Button className="bg-sky-600" onClick={() => setOpen(!isOpen)}>
         <FaPlus className="mr-3 text-sm" />
-        Add film
+        Thêm phim
       </Button>
       <Modal onClose={() => setOpen(false)} show={isOpen}>
         <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
-          <strong>Add film</strong>
+          <strong>Thêm phim</strong>
         </Modal.Header>
         <form onSubmit={handleSubmit} className="bg-white">
           <Modal.Body>
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <div>
-                <Label>Name</Label>
+                <Label>Tên phim</Label>
                 <TextInput
                   name="name"
                   className="mt-1"
@@ -360,7 +361,7 @@ const AddProductModal: React.FC<{
                 />
               </div>
               <div>
-                <Label>Actor</Label>
+                <Label>Diễn viên</Label>
                 <TextInput
                   name="actor"
                   className="mt-1"
@@ -368,7 +369,7 @@ const AddProductModal: React.FC<{
                 />
               </div>
               <div>
-                <Label>Director</Label>
+                <Label>Đạo diễn</Label>
                 <TextInput
                   name="director"
                   className="mt-1"
@@ -376,7 +377,7 @@ const AddProductModal: React.FC<{
                 />
               </div>
               <div>
-                <Label>Producer</Label>
+                <Label>Nhà sản xuất</Label>
                 <TextInput
                   name="producer"
                   className="mt-1"
@@ -384,7 +385,7 @@ const AddProductModal: React.FC<{
                 />
               </div>
               <div>
-                <Label>Duration</Label>
+                <Label>Thời lượng (phút)</Label>
                 <TextInput
                   type="number"
                   name="duration"
@@ -394,7 +395,7 @@ const AddProductModal: React.FC<{
               </div>
 
               <div>
-                <Label>Country</Label>
+                <Label>Quốc gia</Label>
                 <TextInput
                   name="country"
                   className="mt-1"
@@ -403,7 +404,7 @@ const AddProductModal: React.FC<{
               </div>
 
               <div>
-                <Label>Year</Label>
+                <Label>Năm</Label>
                 <TextInput
                   type="number"
                   name="year"
@@ -413,7 +414,7 @@ const AddProductModal: React.FC<{
               </div>
 
               <div>
-                <Label>Age limit</Label>
+                <Label>Độ tuổi giới hạn</Label>
                 <TextInput
                   type="number"
                   name="limitAge"
@@ -423,7 +424,7 @@ const AddProductModal: React.FC<{
               </div>
 
               <div>
-                <Label>Start date: </Label>
+                <Label>Ngày bắt đầu : </Label>
                 <input
                   type="date"
                   name="startDate"
@@ -433,7 +434,7 @@ const AddProductModal: React.FC<{
               </div>
 
               <div>
-                <Label>End date: </Label>
+                <Label>Ngày kết thúc : </Label>
                 <input
                   type="date"
                   name="endDate"
@@ -443,7 +444,7 @@ const AddProductModal: React.FC<{
               </div>
 
               <div className="lg:col-span-2">
-                <Label>Category</Label>
+                <Label>Thể loại</Label>
               </div>
 
               {categoryData &&
@@ -460,7 +461,7 @@ const AddProductModal: React.FC<{
                 ))}
 
               <div className="lg:col-span-2">
-                <Label>Description</Label>
+                <Label>Nội dung phim</Label>
                 <Textarea
                   name="description"
                   rows={6}
@@ -482,7 +483,7 @@ const AddProductModal: React.FC<{
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       <HiUpload className="text-4xl text-gray-300" />
                       <p className="py-1 text-sm text-gray-600 dark:text-gray-500">
-                        Upload an image or drag and drop
+                        Tải ảnh tại đây
                       </p>
                     </div>
                     <input
@@ -527,7 +528,7 @@ const AddProductModal: React.FC<{
 
           <Modal.Footer>
             <Button className="bg-sky-600" type="submit">
-              Add
+              Thêm
             </Button>
           </Modal.Footer>
         </form>
@@ -672,21 +673,21 @@ const EditProductModal: React.FC<{
             (value === null || value === undefined || value === 0))
       )
     ) {
-      toast.error("Please fill in all the fields");
+      toast.error("Hãy điền đầy đủ thông tin");
       return;
     }
 
     if (formData.startDate === "" || formData.endDate === "") {
-      toast.error("Please select dates");
+      toast.error("Làm ơn chọn ngày.");
       return;
     }
     if (new Date(formData.startDate) > new Date(formData.endDate)) {
-      toast.error("End date is ealier than start date.");
+      toast.error("Ngày kết thúc phải sau ngày bắt đầu.");
       return;
     }
     if (isEditImage) {
       if (uploadImages.length == 0) {
-        toast.error("Please select images");
+        toast.error("Làm ơn chọn ảnh.");
         return;
       }
 
@@ -719,7 +720,7 @@ const EditProductModal: React.FC<{
         .then((result) => {
           setOpen(false);
           handleRefetch();
-          toast.success("Edit film successfully");
+          toast.success("Sửa phim thành công");
         })
         .catch((error) => {
           toast.error(error.response.data.messages[0]);
@@ -730,7 +731,7 @@ const EditProductModal: React.FC<{
         .then((response) => {
           setOpen(false);
           handleRefetch();
-          toast.success("Edit film successfully");
+          toast.success("Sửa phim thành công");
         })
         .catch((error) => {
           toast.error(error.response.data.messages[0]);
@@ -748,7 +749,7 @@ const EditProductModal: React.FC<{
         }}
       >
         <HiPencilAlt className="mr-2 text-lg" />
-        Edit
+        Sửa
       </Button>
       <Modal
         onClose={() => {
@@ -757,14 +758,14 @@ const EditProductModal: React.FC<{
         show={isOpen}
       >
         <Modal.Header className="border-b border-gray-200 !p-6 ">
-          <strong>Edit film</strong>
+          <strong>Chỉnh sửa phim</strong>
         </Modal.Header>
         {formData.name && (
           <form onSubmit={handleSubmit} className="bg-white">
             <Modal.Body>
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div>
-                  <Label>Name</Label>
+                  <Label>Tên phim</Label>
                   <TextInput
                     name="name"
                     className="mt-1"
@@ -773,7 +774,7 @@ const EditProductModal: React.FC<{
                   />
                 </div>
                 <div>
-                  <Label>Actor</Label>
+                  <Label>Diễn viên</Label>
                   <TextInput
                     name="actor"
                     className="mt-1"
@@ -782,7 +783,7 @@ const EditProductModal: React.FC<{
                   />
                 </div>
                 <div>
-                  <Label>Director</Label>
+                  <Label>Đạo diễn</Label>
                   <TextInput
                     name="director"
                     className="mt-1"
@@ -791,7 +792,7 @@ const EditProductModal: React.FC<{
                   />
                 </div>
                 <div>
-                  <Label>Producer</Label>
+                  <Label>Nhà sản xuất</Label>
                   <TextInput
                     name="producer"
                     className="mt-1"
@@ -800,7 +801,7 @@ const EditProductModal: React.FC<{
                   />
                 </div>
                 <div>
-                  <Label>Duration</Label>
+                  <Label>Thời lượng (phút)</Label>
                   <TextInput
                     type="number"
                     name="duration"
@@ -811,7 +812,7 @@ const EditProductModal: React.FC<{
                 </div>
 
                 <div>
-                  <Label>Country</Label>
+                  <Label>Quốc gia</Label>
                   <TextInput
                     name="country"
                     className="mt-1"
@@ -821,7 +822,7 @@ const EditProductModal: React.FC<{
                 </div>
 
                 <div>
-                  <Label>Year</Label>
+                  <Label>Năm</Label>
                   <TextInput
                     type="number"
                     name="year"
@@ -832,7 +833,7 @@ const EditProductModal: React.FC<{
                 </div>
 
                 <div>
-                  <Label>Age limit</Label>
+                  <Label>Giới hạn tuổi</Label>
                   <TextInput
                     type="number"
                     name="limitAge"
@@ -843,7 +844,7 @@ const EditProductModal: React.FC<{
                 </div>
 
                 <div>
-                  <Label>Start date: </Label>
+                  <Label>Ngày khởi chiếu :</Label>
                   <input
                     type="date"
                     name="startDate"
@@ -856,7 +857,7 @@ const EditProductModal: React.FC<{
                 </div>
 
                 <div>
-                  <Label>End date: </Label>
+                  <Label>Ngày kết thúc :</Label>
                   <input
                     type="date"
                     name="endDate"
@@ -869,7 +870,7 @@ const EditProductModal: React.FC<{
                 </div>
 
                 <div className="lg:col-span-2">
-                  <Label>Category</Label>
+                  <Label>Thể loại</Label>
                 </div>
 
                 {categoryData &&
@@ -887,7 +888,7 @@ const EditProductModal: React.FC<{
                   ))}
 
                 <div className="lg:col-span-2">
-                  <Label>Description</Label>
+                  <Label>Nội dung phim </Label>
                   <Textarea
                     name="description"
                     rows={6}
@@ -908,7 +909,7 @@ const EditProductModal: React.FC<{
 
                 {!isEditImage && (
                   <div className="lg:col-span-2">
-                    <Label className="mb-5">Image</Label>
+                    <Label className="mb-5">Ảnh</Label>
                     <div className="flex gap-x-3">
                       {apiImages?.map((imageLink, index) => (
                         <img
@@ -929,7 +930,7 @@ const EditProductModal: React.FC<{
                     onClick={() => setIsEditImage(true)}
                   >
                     <HiPencilAlt className="mr-2 text-lg" />
-                    Edit image
+                    Chỉnh sửa ảnh
                   </Button>
                 )}
 
@@ -940,7 +941,7 @@ const EditProductModal: React.FC<{
                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
                           <HiUpload className="text-4xl text-gray-300" />
                           <p className="py-1 text-sm text-gray-600 dark:text-gray-500">
-                            Upload an image or drag and drop
+                            Tải ảnh ở đây
                           </p>
                         </div>
                         <input
@@ -988,11 +989,65 @@ const EditProductModal: React.FC<{
 
             <Modal.Footer>
               <Button className="bg-sky-600" type="submit">
-                Edit
+                Sửa
               </Button>
             </Modal.Footer>
           </form>
         )}
+      </Modal>
+    </>
+  );
+};
+
+const EnableProductModal: React.FC<{
+  enableStatus: boolean;
+  filmId: number | undefined;
+  handleRefetch: () => void;
+}> = ({ enableStatus, filmId, handleRefetch }) => {
+  const [isOpen, setOpen] = useState(false);
+  const enableHandle = () => {
+    setOpen(false);
+    apiClient
+      .patch(`/film/enable?FilmId=${filmId}`)
+      .then((response) => {
+        handleRefetch();
+        toast.success(
+          `${enableStatus === true ? "Ẩn" : "Hiện"} phim thành công`
+        );
+      })
+      .catch((error) => {
+        toast.error(error.response.data.messages[0]);
+      });
+  };
+
+  return (
+    <>
+      <Button className="bg-orange-500" onClick={() => setOpen(!isOpen)}>
+        <HiTrash className="mr-2 text-lg" />
+        {`${enableStatus === true ? "Ẩn" : "Hiện"} phim`}
+      </Button>
+      <Modal onClose={() => setOpen(false)} show={isOpen} size="md">
+        <Modal.Header className="px-3 pt-3 pb-0 text-center">
+          <span>{`${enableStatus === true ? "Ẩn" : "Hiện"} phim`}</span>
+        </Modal.Header>
+        <Modal.Body className="px-6 pb-6 pt-0">
+          <div className="flex flex-col items-center gap-y-6 text-center">
+            <HiOutlineExclamationCircle className="text-7xl text-red-600" />
+            <p className="text-lg text-gray-500 dark:text-gray-300">
+              {`Bạn có muốn ${
+                enableStatus === true ? "ẩn" : "hiện"
+              } phim này không ?`}
+            </p>
+            <div className="flex items-center gap-x-3">
+              <Button color="failure" onClick={enableHandle}>
+                Có
+              </Button>
+              <Button color="gray" onClick={() => setOpen(false)}>
+                Không
+              </Button>
+            </div>
+          </div>
+        </Modal.Body>
       </Modal>
     </>
   );
@@ -1009,7 +1064,7 @@ const DeleteProductModal: React.FC<{
       .delete(`/film?Id=${filmId}`)
       .then((response) => {
         handleRefetch();
-        toast.success("Delete cinema successfully");
+        toast.success("Xóa phim thành công");
       })
       .catch((error) => {
         toast.error(error.response.data.messages[0]);
@@ -1020,24 +1075,24 @@ const DeleteProductModal: React.FC<{
     <>
       <Button color="failure" onClick={() => setOpen(!isOpen)}>
         <HiTrash className="mr-2 text-lg" />
-        Delete
+        Xóa
       </Button>
       <Modal onClose={() => setOpen(false)} show={isOpen} size="md">
         <Modal.Header className="px-3 pt-3 pb-0 text-center">
-          <span>Delete product</span>
+          <span>Xóa phim</span>
         </Modal.Header>
         <Modal.Body className="px-6 pb-6 pt-0">
           <div className="flex flex-col items-center gap-y-6 text-center">
             <HiOutlineExclamationCircle className="text-7xl text-red-600" />
             <p className="text-lg text-gray-500 dark:text-gray-300">
-              Are you sure you want to delete this film?
+              Bạn có muốn xóa phim này không ?
             </p>
             <div className="flex items-center gap-x-3">
               <Button color="failure" onClick={deleteHandle}>
-                Yes, Im sure
+                Có
               </Button>
               <Button color="gray" onClick={() => setOpen(false)}>
-                No, cancel
+                Không
               </Button>
             </div>
           </div>
@@ -1055,20 +1110,21 @@ const FilmTable: React.FC<{
   return (
     <Table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
       <Table.Head className="bg-gray-100 dark:bg-gray-700">
-        <Table.HeadCell>Name</Table.HeadCell>
-        <Table.HeadCell>Actor</Table.HeadCell>
-        <Table.HeadCell>Director</Table.HeadCell>
-        <Table.HeadCell>Duration</Table.HeadCell>
+        <Table.HeadCell>Tên</Table.HeadCell>
+        <Table.HeadCell>Ảnh</Table.HeadCell>
+        <Table.HeadCell>Diễn viên</Table.HeadCell>
+        <Table.HeadCell>Đạo diễn</Table.HeadCell>
+        <Table.HeadCell>Thời lượng</Table.HeadCell>
         {/* <Table.HeadCell>Description</Table.HeadCell> */}
-        <Table.HeadCell>Year</Table.HeadCell>
-        <Table.HeadCell>Country</Table.HeadCell>
-        <Table.HeadCell>Age limit</Table.HeadCell>
+        <Table.HeadCell>Năm</Table.HeadCell>
+        <Table.HeadCell>Quốc gia</Table.HeadCell>
+        <Table.HeadCell>Giới hạn tuổi</Table.HeadCell>
         <Table.HeadCell>Trailer</Table.HeadCell>
-        <Table.HeadCell>Start Date</Table.HeadCell>
-        <Table.HeadCell>End Date</Table.HeadCell>
-        <Table.HeadCell>Category</Table.HeadCell>
-        <Table.HeadCell>Image</Table.HeadCell>
-        <Table.HeadCell>Action</Table.HeadCell>
+        <Table.HeadCell>Ngày khởi chiếu</Table.HeadCell>
+        <Table.HeadCell>Ngày kết thúc</Table.HeadCell>
+        <Table.HeadCell>Thể loại</Table.HeadCell>
+        <Table.HeadCell>Trạng thái</Table.HeadCell>
+        <Table.HeadCell>Các thao tác</Table.HeadCell>
       </Table.Head>
       <Table.Body className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
         {filmApiResponse?.data &&
@@ -1106,10 +1162,13 @@ const FilmRow: React.FC<{
   return (
     <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
       <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-        <div className="text-base font-semibold text-gray-900 dark:text-white">
+        <div className="text-base font-semibold text-gray-900">
           {data?.name}
         </div>
         <div className="text-sm font-normal text-gray-500 "></div>
+      </Table.Cell>
+      <Table.Cell className=" whitespace-nowrap p-4 text-base font-medium text-gray-900 ">
+        <img src={data?.image} />
       </Table.Cell>
       <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 ">
         {data?.actor}
@@ -1146,8 +1205,9 @@ const FilmRow: React.FC<{
       <Table.Cell className=" whitespace-nowrap p-4 text-base font-medium text-gray-900 ">
         {data?.category}
       </Table.Cell>
+
       <Table.Cell className=" whitespace-nowrap p-4 text-base font-medium text-gray-900 ">
-        <img src={data?.image} />
+        {data?.enable === true ? "Hiện" : "Ẩn"}
       </Table.Cell>
       <Table.Cell className="space-x-2 whitespace-nowrap p-4">
         <div className="flex items-center gap-x-3">
@@ -1157,6 +1217,11 @@ const FilmRow: React.FC<{
             handleRefetch={handleRefetch}
           />
           <DeleteProductModal filmId={data?.id} handleRefetch={handleRefetch} />
+          <EnableProductModal
+            filmId={data?.id}
+            handleRefetch={handleRefetch}
+            enableStatus={data?.enable!}
+          />
         </div>
       </Table.Cell>
     </Table.Row>
@@ -1211,16 +1276,16 @@ const Pagination: React.FC<PaginationComponentProps> = ({
         } `}
       >
         <HiChevronLeft className="text-2xl" />
-        <span>Previous </span>
+        <span>Trang trước </span>
       </button>
 
       <div>
         <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-          Showing page&nbsp;
+          Trang&nbsp;
           <span className="font-semibold text-gray-900 dark:text-white">
             {filmApiResponse?.currentPage}
           </span>
-          &nbsp;of&nbsp;
+          &nbsp;trên&nbsp;
           <span className="font-semibold text-gray-900 dark:text-white">
             {filmApiResponse?.totalPages}
           </span>
@@ -1236,7 +1301,7 @@ const Pagination: React.FC<PaginationComponentProps> = ({
             : "cursor-default"
         } `}
       >
-        <span>Next</span>
+        <span>Trang sau</span>
         <HiChevronRight className="text-2xl" />
       </button>
     </div>

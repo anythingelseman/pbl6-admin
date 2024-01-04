@@ -48,7 +48,7 @@ export const ChartRevenue = ({
   const labels = timeStep?.map((step: any) => step.label) || [];
   const series = [
     {
-      name: "Total Revenue",
+      name: "Tổng doanh thu",
       data: timeStep?.map((step: any) => step.totalRevenue) || [],
     },
   ];
