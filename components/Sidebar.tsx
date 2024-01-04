@@ -23,8 +23,13 @@ const SideBar: React.FC<{}> = ({}) => {
         <div className="rounded-none">
           <Sidebar.Items>
             <Sidebar.ItemGroup>
-
-              <Sidebar.Item href="/manage/dashboard" icon={HiChartBar}  className={pathname === "/manage/dashboard" ? "bg-slate-300" : ""}>
+              <Sidebar.Item
+                href="/manage/dashboard"
+                icon={HiChartBar}
+                className={
+                  pathname === "/manage/dashboard" ? "bg-slate-300" : ""
+                }
+              >
                 Dashboard
               </Sidebar.Item>
 
@@ -33,7 +38,7 @@ const SideBar: React.FC<{}> = ({}) => {
                 icon={HiFilm}
                 className={pathname === "/manage/films" ? "bg-slate-300" : ""}
               >
-                Film
+                Phim
               </Sidebar.Item>
 
               {user?.role === "Superadmin" && (
@@ -44,7 +49,7 @@ const SideBar: React.FC<{}> = ({}) => {
                     pathname === "/manage/employee" ? "bg-slate-300" : ""
                   }
                 >
-                  Employee
+                  Nhân viên
                 </Sidebar.Item>
               )}
 
@@ -53,7 +58,7 @@ const SideBar: React.FC<{}> = ({}) => {
                 icon={BsFillHouseDoorFill}
                 className={pathname === "/manage/cinema" ? "bg-slate-300" : ""}
               >
-                Cinema
+                Rạp
               </Sidebar.Item>
 
               <Sidebar.Item
@@ -61,7 +66,7 @@ const SideBar: React.FC<{}> = ({}) => {
                 icon={BsDoorClosedFill}
                 className={pathname === "/manage/room" ? "bg-slate-300" : ""}
               >
-                Room
+                Phòng
               </Sidebar.Item>
               <Sidebar.Item
                 href="/manage/filmScheduling"
@@ -70,7 +75,7 @@ const SideBar: React.FC<{}> = ({}) => {
                   pathname === "/manage/filmScheduling" ? "bg-slate-300" : ""
                 }
               >
-                Film Scheduling
+                Lịch chiếu
               </Sidebar.Item>
 
               <Sidebar.Item
@@ -80,7 +85,7 @@ const SideBar: React.FC<{}> = ({}) => {
                   pathname === "/manage/category" ? "bg-slate-300" : ""
                 }
               >
-                Category
+                Thể loại
               </Sidebar.Item>
               <Sidebar.Item
                 href="/manage/poster"

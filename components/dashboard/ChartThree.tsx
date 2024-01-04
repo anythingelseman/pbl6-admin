@@ -85,7 +85,7 @@ const ChartThree = ({
       <div className="mb-3 justify-between gap-4 sm:flex">
         <div>
           <h5 className="text-xl font-semibold text-black dark:text-white">
-            Daytime Revenue
+            Doanh thu theo giờ
           </h5>
         </div>
         <div>
@@ -95,8 +95,8 @@ const ChartThree = ({
               id=""
               className="relative z-20 inline-flex appearance-none bg-transparent py-1 pl-3 pr-8 text-sm font-medium outline-none"
             >
-              <option value="">Monthly</option>
-              <option value="">Yearly</option>
+              <option value="">Theo tháng</option>
+              <option value="">Theo năm</option>
             </select>
             <span className="absolute top-1/2 right-3 z-10 -translate-y-1/2">
               <svg
@@ -149,7 +149,7 @@ const ChartThree = ({
                   }}
                   className="mr-2 block h-3 w-full max-w-3 rounded-full "
                 ></span>
-                <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
+                <p className="flex flex-col w-full justify-between text-sm font-medium text-black dark:text-white">
                   <span>{`${stat.startHour}h-${stat.endHour}h`}</span>
                   <span>{series[index]}%</span>
                 </p>

@@ -234,7 +234,7 @@ const AddPosterModal: React.FC<{
       .then((result) => {
         handleRefetch();
         setFormData(initialValue);
-        toast.success("Add Poster successfully");
+        toast.success("Thêm poster thành công");
       })
       .catch((error) => {
         toast.error(error.response.data.messages[0]);
@@ -245,11 +245,11 @@ const AddPosterModal: React.FC<{
     <>
       <Button className="bg-sky-600" onClick={() => setOpen(!isOpen)}>
         <FaPlus className="mr-3 text-sm" />
-        Add poster
+        Thêm poster
       </Button>
       <Modal onClose={() => setOpen(false)} show={isOpen}>
         <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
-          <strong>Add poster</strong>
+          <strong>Thêm poster</strong>
         </Modal.Header>
         <form onSubmit={handleSubmit} className="bg-white">
           <Modal.Body>
@@ -268,7 +268,7 @@ const AddPosterModal: React.FC<{
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       <HiUpload className="text-4xl text-gray-300" />
                       <p className="py-1 text-sm text-gray-600 dark:text-gray-500">
-                        Upload an image or drag and drop
+                        Tải ảnh tại đây
                       </p>
                     </div>
                     <input
@@ -312,7 +312,7 @@ const AddPosterModal: React.FC<{
 
           <Modal.Footer>
             <Button className="bg-sky-600" type="submit">
-              Add
+              Thêm
             </Button>
           </Modal.Footer>
         </form>
@@ -593,24 +593,24 @@ const DeleteProductModal: React.FC<{
     <>
       <Button color="failure" onClick={() => setOpen(!isOpen)}>
         <HiTrash className="mr-2 text-lg" />
-        Delete
+        Xóa
       </Button>
       <Modal onClose={() => setOpen(false)} show={isOpen} size="md">
         <Modal.Header className="px-3 pt-3 pb-0 text-center">
-          <span>Delete product</span>
+          <span>Xóa poster</span>
         </Modal.Header>
         <Modal.Body className="px-6 pb-6 pt-0">
           <div className="flex flex-col items-center gap-y-6 text-center">
             <HiOutlineExclamationCircle className="text-7xl text-red-600" />
             <p className="text-lg text-gray-500 dark:text-gray-300">
-              Are you sure you want to delete this poster?
+              Bạn có muốn xóa poster này không
             </p>
             <div className="flex items-center gap-x-3">
               <Button color="failure" onClick={deleteHandle}>
-                Yes, Im sure
+                Có
               </Button>
               <Button color="gray" onClick={() => setOpen(false)}>
-                No, cancel
+                Không
               </Button>
             </div>
           </div>
@@ -628,7 +628,7 @@ const PosterTable: React.FC<{
     <Table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
       <Table.Head className="bg-gray-100 dark:bg-gray-700">
         <Table.HeadCell>Link Url</Table.HeadCell>
-        <Table.HeadCell>Image</Table.HeadCell>
+        <Table.HeadCell>Ảnh</Table.HeadCell>
       </Table.Head>
       <Table.Body className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
         {posterApiResponse?.data &&

@@ -48,11 +48,11 @@ const ChartOne = ({
   const labels = timeStep?.map((step: any) => step.label) || [];
   const series = [
     {
-      name: "Total Bookings",
+      name: "Tổng lượt đặt",
       data: timeStep?.map((step: any) => step.numberOfBookings) || [],
     },
     {
-      name: "Total Tickets",
+      name: "Tổng số vé",
       data: timeStep?.map((step: any) => step.numberOfTickets) || [],
     },
   ];

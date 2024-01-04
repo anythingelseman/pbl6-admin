@@ -58,6 +58,7 @@ interface FilmData {
   image?: string;
   createdOn?: string; // This should be a valid date string format
   lastModifiedOn?: string; // This should be a valid date string format
+  enable: boolean;
 }
 
 interface FilmApiResponse {
@@ -213,15 +214,15 @@ export default function SchedulingPage() {
         <div className="mb-1 w-full">
           <div className="mb-4">
             <h1 className="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
-              Film Scheduling
+              Lịch chiếu phim
             </h1>
           </div>
           <div className="block items-center sm:flex">
             <div className="mb-4 sm:mb-0 sm:pr-3 ">
               <Label htmlFor="search" className="sr-only">
-                Search
+                Tìm kiếm lịch
               </Label>
-              <div className="relative mt-1 lg:w-64 xl:w-96 flex gap-x-3">
+              <div className="relative mt-1 flex gap-x-3 w-[600px]">
                 <Select name="cinemaId" required onChange={changeHandle}>
                   {cinemaApiResponse?.data?.map((cinema) => (
                     <option key={cinema.id} value={cinema.id}>
@@ -229,8 +230,8 @@ export default function SchedulingPage() {
                     </option>
                   ))}
                 </Select>
-                <Button className="bg-sky-600" onClick={searchHandle}>
-                  Search
+                <Button className="bg-sky-600 w-[175px]" onClick={searchHandle}>
+                  Tìm kiếm lịch
                 </Button>
               </div>
             </div>
@@ -325,7 +326,7 @@ const AddScheduleModal: React.FC<{
     e.preventDefault();
     const duration = hours * 60 + minutes;
     if (duration <= 0) {
-      toast.error("Duration not valid");
+      toast.error("Thời gian không hợp lệ");
       return;
     }
 
@@ -333,7 +334,7 @@ const AddScheduleModal: React.FC<{
       startTimes.length === 0 ||
       startTimes.some((time) => time.value.trim() === "")
     ) {
-      toast.error("Start time not valid");
+      toast.error("Thời gian bắt đầu không hợp lệ");
       return;
     }
 
@@ -355,7 +356,7 @@ const AddScheduleModal: React.FC<{
           value === undefined
       )
     ) {
-      toast.error("Please fill in all the fields");
+      toast.error("Hãy điền đầy đủ thông tin");
       return;
     }
     apiClient
@@ -372,7 +373,7 @@ const AddScheduleModal: React.FC<{
           price: 0,
         });
         setStartTimes([{ id: 1, value: "" }]);
-        toast.success("Add schedule successfully");
+        toast.success("Thêm lịch thành công");
       })
       .catch((error: any) => {
         toast.error(error.response.data.messages[0]);
@@ -382,7 +383,7 @@ const AddScheduleModal: React.FC<{
     <>
       <Button className="bg-sky-600" onClick={() => setOpen(!isOpen)}>
         <FaPlus className="mr-3 text-sm" />
-        Add schedule to current cinema
+        Thêm lịch vào rạp
       </Button>
       <Modal
         onClose={() => {
@@ -396,26 +397,28 @@ const AddScheduleModal: React.FC<{
         <form onSubmit={handleSubmit} className="bg-white">
           <Modal.Body>
             <div className="mb-3">
-              <Label>Film</Label>
+              <Label>Phim</Label>
               <Select name="filmId" onChange={handleChange} required>
                 <option selected value="">
-                  Select film
+                  Chọn phim
                 </option>
-                {filmApiResponse?.data.map((film) => (
-                  <option key={film.id} value={film.id}>
-                    {film.name}
-                  </option>
-                ))}
+                {filmApiResponse?.data
+                  .filter((film) => film.enable)
+                  .map((film) => (
+                    <option key={film.id} value={film.id}>
+                      {film.name}
+                    </option>
+                  ))}
               </Select>
             </div>
             <div className="mb-3">
-              <Label>Duration (minutes)</Label>
+              <Label>Thời gian</Label>
               <div className="flex gap-x-3 mt-1">
                 <TextInput
                   className="w-[100px]"
                   type="number"
                   min="0"
-                  placeholder="Hours"
+                  placeholder="Giờ"
                   onChange={(e) => setHours(parseInt(e.target.value))}
                 />
                 <TextInput
@@ -423,13 +426,13 @@ const AddScheduleModal: React.FC<{
                   type="number"
                   min="0"
                   max="59"
-                  placeholder="Minutes"
+                  placeholder="Phút"
                   onChange={(e) => setMinutes(parseInt(e.target.value))}
                 />
               </div>
             </div>
             <div className="mb-3">
-              <Label>Description</Label>
+              <Label>Mô tả</Label>
               <TextInput
                 name="description"
                 className="mt-1"
@@ -437,7 +440,7 @@ const AddScheduleModal: React.FC<{
               />
             </div>
             <div className="mb-3">
-              <Label>Start time</Label>
+              <Label>Giờ bắt đầu</Label>
               <br />
               {startTimes.map((time) => (
                 <div key={time.id}>
@@ -457,18 +460,18 @@ const AddScheduleModal: React.FC<{
                 </div>
               ))}
               <Button className="bg-sky-600 mt-3" onClick={addStartTime}>
-                Add time
+                Thêm giờ
               </Button>
             </div>
             <div className="mb-3">
-              <Label>Cinema</Label>
+              <Label>Rạp</Label>
               <TextInput className="mt-1" value={cinemaName} disabled />
             </div>
             <div className="mb-3">
-              <Label>Room</Label>
+              <Label>Phòng</Label>
               <Select name="roomId" onChange={handleChange} required>
                 <option selected value="">
-                  Select room
+                  Chọn phòng
                 </option>
                 {currentRooms?.map((room) => (
                   <option key={room.id} value={room.id}>
@@ -478,7 +481,7 @@ const AddScheduleModal: React.FC<{
               </Select>
             </div>
             <div className="mb-3">
-              <Label>Price (VND)</Label>
+              <Label>Giá vé (VND)</Label>
               <TextInput
                 name="price"
                 className="mt-1"
@@ -489,7 +492,7 @@ const AddScheduleModal: React.FC<{
           </Modal.Body>
           <Modal.Footer>
             <Button className="bg-sky-600" type="submit">
-              Add
+              Thêm lịch
             </Button>
           </Modal.Footer>
         </form>
@@ -557,7 +560,7 @@ const ScheduleTable: React.FC<{
       .delete(`/schedule?Id=${selectedSchedule?.id}`)
       .then((response) => {
         refetchHandle();
-        toast.success("Delete schedule successfully");
+        toast.success("Xóa lịch thành công");
       })
       .catch((error) => {
         toast.error(error.response.data.messages[0]);
@@ -594,12 +597,12 @@ const ScheduleTable: React.FC<{
       />
       <Modal show={!!selectedSchedule} onClose={handleCloseModal}>
         <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
-          <strong>Details</strong>
+          <strong>Chi tiết</strong>
         </Modal.Header>
         <form className="bg-white">
           <Modal.Body>
             <div>
-              <Label>Film</Label>
+              <Label>Phim</Label>
               <TextInput
                 className="mt-1"
                 onChange={handleChange}
@@ -608,7 +611,7 @@ const ScheduleTable: React.FC<{
               />
             </div>
             <div>
-              <Label>Duration (minutes)</Label>
+              <Label>Thời gian (phút)</Label>
               <TextInput
                 type="number"
                 className="mt-1"
@@ -618,7 +621,7 @@ const ScheduleTable: React.FC<{
               />
             </div>
             <div className="mt-3">
-              <Label htmlFor="price">Start time: </Label>
+              <Label htmlFor="price">Giờ bắt đầu: </Label>
               <br />
               <input
                 type="datetime-local"
@@ -629,7 +632,7 @@ const ScheduleTable: React.FC<{
               />
             </div>
             <div className="mt-3">
-              <Label htmlFor="price">End time: </Label>
+              <Label htmlFor="price">Giờ kết thúc: </Label>
               <br />
               <input
                 type="datetime-local"
@@ -640,7 +643,7 @@ const ScheduleTable: React.FC<{
               />
             </div>
             <div className="mt-3">
-              <Label>Room</Label>
+              <Label>Phòng</Label>
               <TextInput
                 type="text"
                 className="mt-1"
@@ -650,7 +653,7 @@ const ScheduleTable: React.FC<{
               />
             </div>
             <div className="mt-3">
-              <Label>Price (VND)</Label>
+              <Label>Giá (VND)</Label>
               <TextInput
                 type="text"
                 className="mt-1"
@@ -661,7 +664,7 @@ const ScheduleTable: React.FC<{
             </div>
 
             <div className="mt-5">
-              <Label className="text-md">Seats </Label>
+              <Label className="text-md">Ghế </Label>
               <div className="mt-3 py-5 ">
                 {scheduleSeats && (
                   <Seats
@@ -678,7 +681,7 @@ const ScheduleTable: React.FC<{
             <div className="flex justify-center ">
               <Button color="failure" onClick={deleteHandle} className="mt-8">
                 <HiTrash className="mr-2 text-lg" />
-                Delete schedule
+                Xóa lịch
               </Button>
             </div>
           </Modal.Body>
@@ -736,10 +739,10 @@ const Seats: React.FC<{
 
   const lockSeatHandler = async () => {
     if (selectedSeats.length === 0) {
-      toast.error("Please select at least one seat");
+      toast.error("Hãy chọn ít nhất một ghế");
       return;
     }
-    const confirmLock = window.confirm("Do you want to reserve these seats?");
+    const confirmLock = window.confirm("Bạn có muốn đặt ghế này không ?");
     if (confirmLock) {
       try {
         const numberSeats = selectedSeats.map((seat) => {
@@ -768,7 +771,7 @@ const Seats: React.FC<{
         );
         setSelectedSeats([]);
         refetchSeats();
-        toast.success("Reserve seats successfully");
+        toast.success("Đặt chỗ thành công");
       } catch (error: any) {
         toast.error(error.response.data.messages[0]);
       }
@@ -780,7 +783,7 @@ const Seats: React.FC<{
       <>
         <div className="flex justify-center">
           <Button className="bg-sky-600" onClick={lockSeatHandler}>
-            Reserve seats
+            Đặt chỗ
           </Button>
         </div>
         <div className="flex justify-center mt-4 ">

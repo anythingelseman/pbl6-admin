@@ -98,7 +98,7 @@ export default function CategoryPage() {
         <div className="mb-1 w-full">
           <div className="mb-4">
             <h1 className="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
-              Category
+              Thể loại
             </h1>
           </div>
           <div className="block items-center sm:flex">
@@ -106,17 +106,17 @@ export default function CategoryPage() {
               <Label htmlFor="search" className="sr-only">
                 Search
               </Label>
-              <div className="relative mt-1 lg:w-64 xl:w-96 flex gap-x-3">
+              <div className="relative mt-1  flex gap-x-3">
                 <TextInput
                   className="w-[400px]"
                   id="search"
                   name="search"
-                  placeholder="Name search "
+                  placeholder="Tìm kiếm theo tên "
                   value={searchTerm}
                   onChange={changeHandle}
                 />
-                <Button className="bg-sky-600" onClick={searchHandle}>
-                  Search
+                <Button className="bg-sky-600 w-[100px]" onClick={searchHandle}>
+                  Tìm kiếm
                 </Button>
               </div>
             </div>
@@ -171,7 +171,7 @@ const AddProductModal: React.FC<{
           value === undefined
       )
     ) {
-      toast.error("Please fill in all the fields");
+      toast.error("Hãy điền đầy đủ thông tin");
       return;
     }
     console.log(formData);
@@ -184,6 +184,7 @@ const AddProductModal: React.FC<{
       setOpen(false);
       setFormData({ name: "" });
       handleRefetch();
+      toast.success("Thêm thể loại thành công");
     } catch (error: any) {
       toast.error(error.response.data.messages[0]);
     }
@@ -193,17 +194,17 @@ const AddProductModal: React.FC<{
     <>
       <Button className="bg-sky-600" onClick={() => setOpen(!isOpen)}>
         <FaPlus className="mr-3 text-sm" />
-        Add
+        Thêm thể loại
       </Button>
       <Modal onClose={() => setOpen(false)} show={isOpen}>
         <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
-          <strong>Add </strong>
+          <strong>Thêm thể loại </strong>
         </Modal.Header>
         <form onSubmit={handleSubmit}>
           <Modal.Body>
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <div>
-                <Label htmlFor="name">Category Name</Label>
+                <Label htmlFor="name">Tên thể loại</Label>
                 <TextInput
                   id="name"
                   name="name"
@@ -215,7 +216,7 @@ const AddProductModal: React.FC<{
           </Modal.Body>
           <Modal.Footer>
             <Button className="bg-sky-600" type="submit">
-              Add
+              Thêm
             </Button>
           </Modal.Footer>
         </form>
@@ -231,7 +232,7 @@ const CategoryTable: React.FC<{
     <Table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
       <Table.Head className="bg-gray-100 dark:bg-gray-700">
         <Table.HeadCell>Id</Table.HeadCell>
-        <Table.HeadCell>Category Name</Table.HeadCell>
+        <Table.HeadCell>Tên thể loại</Table.HeadCell>
       </Table.Head>
       <Table.Body className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
         {categoryData?.data &&
@@ -309,16 +310,16 @@ const Pagination: React.FC<PaginationComponentProps> = ({
         } `}
       >
         <HiChevronLeft className="text-2xl" />
-        <span>Previous </span>
+        <span>Trang trước </span>
       </button>
 
       <div>
         <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-          Showing page&nbsp;
+          Trang&nbsp;
           <span className="font-semibold text-gray-900 dark:text-white">
             {categoryData?.currentPage}
           </span>
-          &nbsp;of&nbsp;
+          &nbsp;trên&nbsp;
           <span className="font-semibold text-gray-900 dark:text-white">
             {categoryData?.totalPages}
           </span>
@@ -334,7 +335,7 @@ const Pagination: React.FC<PaginationComponentProps> = ({
             : "cursor-default"
         } `}
       >
-        <span>Next</span>
+        <span>Trang sau</span>
         <HiChevronRight className="text-2xl" />
       </button>
     </div>
