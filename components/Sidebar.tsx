@@ -54,6 +54,16 @@ const SideBar: React.FC<{}> = ({}) => {
               )}
 
               <Sidebar.Item
+                href="/manage/customer"
+                icon={HiUsers}
+                className={
+                  pathname === "/manage/customer" ? "bg-slate-300" : ""
+                }
+              >
+                Khách hàng
+              </Sidebar.Item>
+
+              <Sidebar.Item
                 href="/manage/cinema"
                 icon={BsFillHouseDoorFill}
                 className={pathname === "/manage/cinema" ? "bg-slate-300" : ""}

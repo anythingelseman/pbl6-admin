@@ -102,12 +102,12 @@ export default function FilmsPage() {
     const fetchData = async () => {
       setIsLoading(true);
       const response1 = await apiClient.get<FilmApiResponse | undefined>(
-        `/film?OrderBy=id`
+        `/film?OrderBy=id`,
       );
       setFilmApiResponse(response1.data);
 
       const response2 = await apiClient.get<CategoryApiResponse | undefined>(
-        `/category?PageSize=50&OrderBy=id`
+        `/category?PageSize=50&OrderBy=id`,
       );
       setCategoryApiResponse(response2.data);
       setIsLoading(false);
@@ -129,7 +129,7 @@ export default function FilmsPage() {
     try {
       setCurrentSearched(searchTerm);
       const response = await apiClient.get<FilmApiResponse | undefined>(
-        `/film?Keyword=${searchTerm}&OrderBy=id`
+        `/film?Keyword=${searchTerm}&OrderBy=id`,
       );
       setFilmApiResponse(response.data);
     } catch (error) {
@@ -235,7 +235,7 @@ const AddProductModal: React.FC<{
   const [formData, setFormData] = useState<FilmData>(initialValue);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData({
@@ -296,7 +296,7 @@ const AddProductModal: React.FC<{
         (value) =>
           (typeof value === "string" && value.trim() === "") ||
           (typeof value === "number" &&
-            (value === null || value === undefined || value === 0))
+            (value === null || value === undefined || value === 0)),
       )
     ) {
       toast.error("Hãy điền đầy đủ thông tin.");
@@ -325,7 +325,7 @@ const AddProductModal: React.FC<{
       .then(async (uploadedImages) => {
         const response = await apiClient.post(
           `/film`,
-          JSON.stringify({ ...formData, fileImages: uploadedImages })
+          JSON.stringify({ ...formData, fileImages: uploadedImages }),
         );
         return response.data;
       })
@@ -519,7 +519,7 @@ const AddProductModal: React.FC<{
                           </span>
                         </div>
                       );
-                    }
+                    },
                   )}
                 </div>
               </div>
@@ -633,7 +633,7 @@ const EditProductModal: React.FC<{
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData({
@@ -670,7 +670,7 @@ const EditProductModal: React.FC<{
         (value) =>
           (typeof value === "string" && value.trim() === "") ||
           (typeof value === "number" &&
-            (value === null || value === undefined || value === 0))
+            (value === null || value === undefined || value === 0)),
       )
     ) {
       toast.error("Hãy điền đầy đủ thông tin");
@@ -712,7 +712,7 @@ const EditProductModal: React.FC<{
         .then(async (uploadedImages) => {
           const response = await apiClient.put(
             `/film`,
-            JSON.stringify({ ...formData, fileImages: uploadedImages })
+            JSON.stringify({ ...formData, fileImages: uploadedImages }),
           );
 
           return response.data;
@@ -970,7 +970,7 @@ const EditProductModal: React.FC<{
                                   let images = uploadImages.filter(
                                     (el: any) => {
                                       if (el.name !== img.name) return el;
-                                    }
+                                    },
                                   );
                                   setUploadImages([...images]);
                                 }}
@@ -979,7 +979,7 @@ const EditProductModal: React.FC<{
                               </span>
                             </div>
                           );
-                        }
+                        },
                       )}
                     </div>
                   </div>
@@ -1239,7 +1239,7 @@ const Pagination: React.FC<PaginationComponentProps> = ({
       const response = await apiClient.get<FilmApiResponse | undefined>(
         `/film?Keyword=${currentSearched}&PageNumber=${
           filmApiResponse?.currentPage + 1
-        }&OrderBy=id`
+        }&OrderBy=id`,
       );
       setFilmApiResponse(response.data);
       console.log(response.data);
@@ -1254,7 +1254,7 @@ const Pagination: React.FC<PaginationComponentProps> = ({
       const response = await apiClient.get(
         `/film?Keyword=${currentSearched}&PageNumber=${
           filmApiResponse?.currentPage - 1
-        }&OrderBy=id`
+        }&OrderBy=id`,
       );
       const data = response.data;
       setFilmApiResponse(data);
