@@ -68,7 +68,7 @@ export default function CustomerPage() {
             <TextInput
               ref={inputRef}
               className="w-[400px]"
-              placeholder="Search customer..."
+              placeholder="Tìm kiếm khách hàng..."
             />
             <Button
               onClick={() => {
@@ -77,7 +77,7 @@ export default function CustomerPage() {
               }}
               className="bg-sky-600"
             >
-              Search
+              Tìm
             </Button>
             <Button
               onClick={() => {
@@ -88,14 +88,14 @@ export default function CustomerPage() {
               }}
               className="bg-sky-600"
             >
-              Clear
+              Xóa
             </Button>
           </div>
         </div>
       </div>
 
       <div className="mt-10">
-        <h3 className="text-lg font-bold">Customers</h3>
+        <h3 className="text-lg font-bold">Khách hàng</h3>
 
         {isLoading && (
           <div className="min-h-[300px] flex items-center justify-center">
@@ -107,11 +107,11 @@ export default function CustomerPage() {
           <div className="border-[3px] border-black rounded-md py-2 mt-8">
             <div className="grid grid-cols-12 mt-4">
               <div className="col-span-1 text-center">#</div>
-              <div className="col-span-2 text-center">Name</div>
+              <div className="col-span-2 text-center">Tên</div>
               <div className="col-span-2 text-center">Email</div>
-              <div className="col-span-2 text-center">Phone number</div>
-              <div className="col-span-3 text-center">Address</div>
-              <div className="col-span-2 text-center">Date of birth</div>
+              <div className="col-span-2 text-center">Số điện thoại</div>
+              <div className="col-span-3 text-center">Địa chỉ</div>
+              <div className="col-span-2 text-center">Ngày sinh</div>
             </div>
 
             <ul className=" mt-8">
@@ -252,7 +252,7 @@ const CustomerRow = ({
       <Modal size={"8xl"} show={openModal} onClose={() => setOpenModal(false)}>
         <Modal.Header className="w-full">
           <div className="flex items-center gap-4 justify-between sm:w-[500px] 2xl:w-[1770px] xl:w-[1200px]">
-            <div>Booking history</div>
+            <div>Lịch sử đặt vé</div>
 
             <div>
               <Select
@@ -276,13 +276,13 @@ const CustomerRow = ({
         <Modal.Body>
           <Table>
             <Table.Head>
-              <Table.HeadCell>Customer Name</Table.HeadCell>
-              <Table.HeadCell>Phone Number</Table.HeadCell>
-              <Table.HeadCell>Total Price</Table.HeadCell>
-              <Table.HeadCell>Booking Date</Table.HeadCell>
-              <Table.HeadCell>Film Name</Table.HeadCell>
-              <Table.HeadCell>Cinema Name</Table.HeadCell>
-              <Table.HeadCell>Usage Status</Table.HeadCell>
+              <Table.HeadCell>Tên khách hàng</Table.HeadCell>
+              <Table.HeadCell>Số điện thoại</Table.HeadCell>
+              <Table.HeadCell>Tổng tiền</Table.HeadCell>
+              <Table.HeadCell>Ngày đặt</Table.HeadCell>
+              <Table.HeadCell>Tên phim</Table.HeadCell>
+              <Table.HeadCell>Rạp</Table.HeadCell>
+              <Table.HeadCell>Trạng thái</Table.HeadCell>
             </Table.Head>
             <Table.Body className="divide-y">
               {bookings &&
