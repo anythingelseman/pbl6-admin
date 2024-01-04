@@ -10,12 +10,18 @@ import {
   Table,
   TextInput,
 } from "flowbite-react";
-import { InputHTMLAttributes, useEffect, useRef, useState } from "react";
-import { HiChevronDown } from "react-icons/hi";
+import {
+  InputHTMLAttributes,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 interface Customer {
   id: number;
   customerName: string;
+  email: string;
   phoneNumber: string;
   address: string;
   dateOfBirth: string;
@@ -102,7 +108,8 @@ export default function CustomerPage() {
             <div className="grid grid-cols-12 mt-4">
               <div className="col-span-1 text-center">#</div>
               <div className="col-span-2 text-center">Name</div>
-              <div className="col-span-3 text-center">Phone number</div>
+              <div className="col-span-2 text-center">Email</div>
+              <div className="col-span-2 text-center">Phone number</div>
               <div className="col-span-3 text-center">Address</div>
               <div className="col-span-2 text-center">Date of birth</div>
             </div>
@@ -156,8 +163,10 @@ const CustomerRow = ({
   customer: Customer;
   index: number;
 }) => {
+  const [cinemas, setCinemas] = useState<any[]>();
   const [openModal, setOpenModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedCinema, setSelectedCinema] = useState(-1);
   const [bookings, setBookings] = useState<Booking[]>();
   const formatDate = (dateString: string): string => {
     const options: Intl.DateTimeFormatOptions = {
@@ -178,9 +187,30 @@ const CustomerRow = ({
       try {
         setIsLoading(true);
 
+        const response = await apiClient.get(`/cinema`);
+
+        setCinemas(response.data.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    if (openModal) {
+      fetchData();
+    }
+
+    fetchData();
+  }, [openModal]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+
         const response = await apiClient.get(`/booking`, {
           params: {
             customerId: customer.id,
+            cinemaId: selectedCinema !== -1 ? selectedCinema : undefined,
           },
         });
 
@@ -196,7 +226,7 @@ const CustomerRow = ({
     }
 
     fetchData();
-  }, [openModal]);
+  }, [openModal, selectedCinema]);
 
   return (
     <>
@@ -211,7 +241,8 @@ const CustomerRow = ({
         >
           <div className="col-span-1 text-center">{index}</div>
           <div className="col-span-2 text-center">{customer.customerName}</div>
-          <div className="col-span-3 text-center">{customer.phoneNumber}</div>
+          <div className="col-span-2 text-center">{customer.email}</div>
+          <div className="col-span-2 text-center">{customer.phoneNumber}</div>
           <div className="col-span-3 text-center">{customer.address}</div>
           <div className="col-span-2 text-center">
             {formatDate(customer.dateOfBirth)}
@@ -220,13 +251,24 @@ const CustomerRow = ({
       </li>
       <Modal size={"8xl"} show={openModal} onClose={() => setOpenModal(false)}>
         <Modal.Header className="w-full">
-          <div className="flex justify-between w-[1770px]">
+          <div className="flex items-center gap-4 justify-between sm:w-[500px] 2xl:w-[1770px] xl:w-[1200px]">
             <div>Booking history</div>
 
             <div>
-              <Select id="countries" required>
-                <option>Tất cả</option>
-                <option>Đã hết hạn</option>
+              <Select
+                id="cinemas"
+                value={selectedCinema}
+                onChange={(e) => setSelectedCinema(Number(e.target.value))}
+              >
+                <option value={-1}>Tất cả</option>
+                {cinemas &&
+                  cinemas.map((cinema) => {
+                    return (
+                      <option key={cinema.id} value={cinema.id}>
+                        {cinema.name}
+                      </option>
+                    );
+                  })}
               </Select>
             </div>
           </div>
@@ -247,9 +289,13 @@ const CustomerRow = ({
                 bookings.map((booking) => {
                   return <BookingRow booking={booking} key={booking.id} />;
                 })}
-              {/* Add more rows for additional data entries */}
             </Table.Body>
           </Table>
+          {bookings && bookings.length === 0 && (
+            <div className="text-center text-xl mt-10">
+              Khách hàng chưa có booking nào được tạo
+            </div>
+          )}
         </Modal.Body>
       </Modal>
     </>
