@@ -50,7 +50,7 @@ export default function LoginPage() {
       if (result.succeeded == true) {
         localStorage.setItem("USER", JSON.stringify(result.data));
         toast.success("Log in successfully");
-        router.push("/manage/films");
+        router.push("/manage/dashboard");
       }
     } catch (error: any) {
       toast.error(error.response.data.messages[0]);

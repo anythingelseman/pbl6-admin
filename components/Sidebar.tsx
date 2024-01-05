@@ -33,13 +33,15 @@ const SideBar: React.FC<{}> = ({}) => {
                 Dashboard
               </Sidebar.Item>
 
-              <Sidebar.Item
-                href="/manage/films"
-                icon={HiFilm}
-                className={pathname === "/manage/films" ? "bg-slate-300" : ""}
-              >
-                Phim
-              </Sidebar.Item>
+              {user?.role === "Superadmin" && (
+                <Sidebar.Item
+                  href="/manage/films"
+                  icon={HiFilm}
+                  className={pathname === "/manage/films" ? "bg-slate-300" : ""}
+                >
+                  Phim
+                </Sidebar.Item>
+              )}
 
               {user?.role === "Superadmin" && (
                 <Sidebar.Item
@@ -63,21 +65,28 @@ const SideBar: React.FC<{}> = ({}) => {
                 Khách hàng
               </Sidebar.Item>
 
-              <Sidebar.Item
-                href="/manage/cinema"
-                icon={BsFillHouseDoorFill}
-                className={pathname === "/manage/cinema" ? "bg-slate-300" : ""}
-              >
-                Rạp
-              </Sidebar.Item>
+              {user?.role === "Superadmin" && (
+                <Sidebar.Item
+                  href="/manage/cinema"
+                  icon={BsFillHouseDoorFill}
+                  className={
+                    pathname === "/manage/cinema" ? "bg-slate-300" : ""
+                  }
+                >
+                  Rạp
+                </Sidebar.Item>
+              )}
 
-              <Sidebar.Item
-                href="/manage/room"
-                icon={BsDoorClosedFill}
-                className={pathname === "/manage/room" ? "bg-slate-300" : ""}
-              >
-                Phòng
-              </Sidebar.Item>
+              {user?.role === "Superadmin" && (
+                <Sidebar.Item
+                  href="/manage/room"
+                  icon={BsDoorClosedFill}
+                  className={pathname === "/manage/room" ? "bg-slate-300" : ""}
+                >
+                  Phòng
+                </Sidebar.Item>
+              )}
+
               <Sidebar.Item
                 href="/manage/filmScheduling"
                 icon={BiTime}
@@ -88,22 +97,28 @@ const SideBar: React.FC<{}> = ({}) => {
                 Lịch chiếu
               </Sidebar.Item>
 
-              <Sidebar.Item
-                href="/manage/category"
-                icon={BiSolidCategoryAlt}
-                className={
-                  pathname === "/manage/category" ? "bg-slate-300" : ""
-                }
-              >
-                Thể loại
-              </Sidebar.Item>
-              <Sidebar.Item
-                href="/manage/poster"
-                icon={PiSlideshowLight}
-                className={pathname === "/manage/poster" ? "bg-slate-300" : ""}
-              >
-                Poster
-              </Sidebar.Item>
+              {user?.role === "Superadmin" && (
+                <Sidebar.Item
+                  href="/manage/category"
+                  icon={BiSolidCategoryAlt}
+                  className={
+                    pathname === "/manage/category" ? "bg-slate-300" : ""
+                  }
+                >
+                  Thể loại
+                </Sidebar.Item>
+              )}
+              {user?.role === "Superadmin" && (
+                <Sidebar.Item
+                  href="/manage/poster"
+                  icon={PiSlideshowLight}
+                  className={
+                    pathname === "/manage/poster" ? "bg-slate-300" : ""
+                  }
+                >
+                  Poster
+                </Sidebar.Item>
+              )}
             </Sidebar.ItemGroup>
           </Sidebar.Items>
         </div>

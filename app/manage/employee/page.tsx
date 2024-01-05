@@ -36,6 +36,7 @@ interface EmployeeData {
   imageLink?: any;
   email?: string | undefined;
   password?: string | undefined;
+  isAdmin?: boolean | undefined;
 }
 
 interface EmployeeApiResponse {
@@ -418,6 +419,7 @@ const EmployeeTable: React.FC<{
         <Table.HeadCell>Giới tính</Table.HeadCell>
         <Table.HeadCell>Số điện thoại</Table.HeadCell>
         <Table.HeadCell>Email</Table.HeadCell>
+        <Table.HeadCell>Vị trí</Table.HeadCell>
         <Table.HeadCell>Các thao tác</Table.HeadCell>
       </Table.Head>
       <Table.Body className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
@@ -454,6 +456,9 @@ const EmployeeRow: React.FC<{
       </Table.Cell>
       <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 ">
         {data?.email}
+      </Table.Cell>
+      <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 ">
+        {data?.isAdmin ? "Admin" : "Nhân viên"}
       </Table.Cell>
 
       <Table.Cell className="space-x-2 whitespace-nowrap p-4">
