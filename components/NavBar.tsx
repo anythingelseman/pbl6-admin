@@ -43,6 +43,20 @@ export default function NavBar() {
               Vị trí: {user?.role}
             </span>
           </Dropdown.Header>
+          <Dropdown.Item
+            as="a"
+            className="text-white"
+            href="/manage/accountDetail"
+          >
+            Thông tin tài khoản
+          </Dropdown.Item>
+          <Dropdown.Item
+            as="a"
+            className="text-white"
+            href="/manage/changePassword"
+          >
+            Đổi mật khẩu
+          </Dropdown.Item>
           <Dropdown.Item className="text-white" onClick={logoutHandler}>
             Đăng xuất
           </Dropdown.Item>

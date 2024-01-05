@@ -1,5 +1,6 @@
 "use client";
 
+import { useUser } from "@/app/hooks/useUser";
 import apiClient from "@/services/apiClient";
 import {
   Button,
@@ -66,6 +67,8 @@ export default function EmployeePage() {
   const [currentSearched, setCurrentSearched] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [refetchTrigger, setRefetchTrigger] = useState(false);
+
+  const { user } = useUser();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -358,6 +361,54 @@ const AddEmployeeModal: React.FC<{
   );
 };
 
+const ResetPasswordModal: React.FC<{
+  employeeId: number | undefined;
+}> = ({ employeeId }) => {
+  const [isOpen, setOpen] = useState(false);
+  const resetHandle = async () => {
+    try {
+      const response = await apiClient.get(`/employee/${employeeId}`);
+      const username = response.data.data.userName;
+      await apiClient.patch(`/employee/${username}/reset-password`);
+      toast.success("Đặt lại mật khẩu thành công");
+      setOpen(false);
+    } catch (error: any) {
+      toast.error(error.response.data.messages[0]);
+    }
+  };
+
+  return (
+    <>
+      <Button color="warning" onClick={() => setOpen(!isOpen)}>
+        <HiTrash className="mr-2 text-lg" />
+        Đặt lại mật khẩu
+      </Button>
+      <Modal onClose={() => setOpen(false)} show={isOpen} size="md">
+        <Modal.Header className="px-3 pt-3 pb-0 text-center">
+          <span>Đặt lại mật khẩu</span>
+        </Modal.Header>
+        <Modal.Body className="px-6 pb-6 pt-0">
+          <div className="flex flex-col items-center gap-y-6 text-center">
+            <HiOutlineExclamationCircle className="text-7xl text-red-600" />
+            <p className="text-lg text-gray-500 dark:text-gray-300">
+              Bạn có muốn đặt lại mật khẩu cho tài khoản này không ? Mật khẩu
+              mới sẽ là Abc123!@#
+            </p>
+            <div className="flex items-center gap-x-3">
+              <Button color="warning" onClick={resetHandle}>
+                Có
+              </Button>
+              <Button color="gray" onClick={() => setOpen(false)}>
+                Không
+              </Button>
+            </div>
+          </div>
+        </Modal.Body>
+      </Modal>
+    </>
+  );
+};
+
 const DeleteProductModal: React.FC<{
   employeeId: number | undefined;
   handleRefetch: () => void;
@@ -412,6 +463,7 @@ const EmployeeTable: React.FC<{
   employeeApiResponse: EmployeeApiResponse | undefined;
   handleRefetch: () => void;
 }> = ({ employeeApiResponse, handleRefetch }) => {
+  const { user } = useUser();
   return (
     <Table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
       <Table.Head className="bg-gray-100 dark:bg-gray-700">
@@ -423,14 +475,17 @@ const EmployeeTable: React.FC<{
         <Table.HeadCell>Các thao tác</Table.HeadCell>
       </Table.Head>
       <Table.Body className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-        {employeeApiResponse?.data &&
-          employeeApiResponse.data.map((data) => (
-            <EmployeeRow
-              data={data}
-              key={data.id}
-              handleRefetch={handleRefetch}
-            />
-          ))}
+        {user &&
+          employeeApiResponse?.data &&
+          employeeApiResponse.data
+            .filter((data) => user?.userId !== data.id)
+            .map((data) => (
+              <EmployeeRow
+                data={data}
+                key={data.id}
+                handleRefetch={handleRefetch}
+              />
+            ))}
       </Table.Body>
     </Table>
   );
@@ -467,6 +522,7 @@ const EmployeeRow: React.FC<{
             employeeId={data?.id}
             handleRefetch={handleRefetch}
           />
+          <ResetPasswordModal employeeId={data?.id} />
         </div>
       </Table.Cell>
     </Table.Row>

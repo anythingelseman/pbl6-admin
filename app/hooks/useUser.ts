@@ -6,7 +6,7 @@ export const useUser = () => {
 
   useLayoutEffect(() => {
     if (localStorage) {
-      setUser(JSON.parse(storage.get("user") || "{}"));
+      setUser(JSON.parse(storage.get("USER") || "{}"));
     }
   }, []);
 

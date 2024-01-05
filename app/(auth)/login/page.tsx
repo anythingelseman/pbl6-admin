@@ -49,7 +49,7 @@ export default function LoginPage() {
 
       if (result.succeeded == true) {
         localStorage.setItem("USER", JSON.stringify(result.data));
-        toast.success("Log in successfully");
+        toast.success("Đăng nhập thành công");
         router.push("/manage/dashboard");
       }
     } catch (error: any) {

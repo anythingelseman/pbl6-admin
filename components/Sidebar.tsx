@@ -5,6 +5,7 @@ import { PiSlideshowLight } from "react-icons/pi";
 import { BiTime, BiSolidCategoryAlt } from "react-icons/bi";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { FaUserCheck } from "react-icons/fa";
 const SideBar: React.FC<{}> = ({}) => {
   const router = useRouter();
   const [user, setUser] = useState<any>();

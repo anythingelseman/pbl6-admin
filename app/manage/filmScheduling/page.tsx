@@ -147,6 +147,8 @@ export default function SchedulingPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isFetchingSchedule, setIsFetchingSchedule] = useState(false);
 
+  const { user } = useUser();
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -236,12 +238,14 @@ export default function SchedulingPage() {
               </div>
             </div>
             <div className="flex w-full items-center sm:justify-end">
-              <AddScheduleModal
-                filmApiResponse={filmApiResponse}
-                cinemaName={getCinemaNameById(cinemaId)}
-                currentRooms={currentRooms}
-                refetchHandle={searchHandle}
-              />
+              {user && user.role === "Superadmin" && (
+                <AddScheduleModal
+                  filmApiResponse={filmApiResponse}
+                  cinemaName={getCinemaNameById(cinemaId)}
+                  currentRooms={currentRooms}
+                  refetchHandle={searchHandle}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -260,6 +264,7 @@ export default function SchedulingPage() {
                   refetchHandle={searchHandle}
                   scheduleApiResponse={scheduleApiResponse}
                   currentRooms={currentRooms}
+                  user={user}
                 />
               )}
             </div>
@@ -505,7 +510,8 @@ const ScheduleTable: React.FC<{
   scheduleApiResponse: ScheduleApiResponse | undefined;
   currentRooms: RoomData[] | undefined;
   refetchHandle: () => void;
-}> = ({ scheduleApiResponse, currentRooms, refetchHandle }) => {
+  user: any;
+}> = ({ scheduleApiResponse, currentRooms, refetchHandle, user }) => {
   const [selectedSchedule, setSelectedSchedule] = useState<ScheduleItem | null>(
     null
   );
@@ -671,6 +677,7 @@ const ScheduleTable: React.FC<{
                     seats={scheduleSeats}
                     refetchSeats={refetchSeats}
                     scheduleId={selectedSchedule?.id}
+                    user={user}
                   />
                 )}
               </div>
@@ -679,10 +686,12 @@ const ScheduleTable: React.FC<{
             <hr className="w-full " />
 
             <div className="flex justify-center ">
-              <Button color="failure" onClick={deleteHandle} className="mt-8">
-                <HiTrash className="mr-2 text-lg" />
-                Xóa lịch
-              </Button>
+              {user && user.role === "Superadmin" && (
+                <Button color="failure" onClick={deleteHandle} className="mt-8">
+                  <HiTrash className="mr-2 text-lg" />
+                  Xóa lịch
+                </Button>
+              )}
             </div>
           </Modal.Body>
         </form>
@@ -695,7 +704,8 @@ const Seats: React.FC<{
   seats: any[];
   refetchSeats: () => void;
   scheduleId: number | undefined;
-}> = ({ seats, refetchSeats, scheduleId }) => {
+  user: any;
+}> = ({ seats, refetchSeats, scheduleId, user }) => {
   useEffect(() => {
     if (seats.length > 0) {
       setRows(constructRows(seats));
@@ -718,7 +728,6 @@ const Seats: React.FC<{
 
   const [rows, setRows] = useState(constructRows(seats));
   const [selectedSeats, setSelectedSeats] = useState<TSeat[]>([]);
-  const user = useUser();
 
   const selectSeat = (seat: TSeat) => {
     if (seat.status === 2 || seat.status === 3) {
@@ -752,7 +761,7 @@ const Seats: React.FC<{
         const reserveData = {
           numberSeats: numberSeats,
           scheduleId: scheduleId,
-          customerId: user.user.userId,
+          customerId: user.userId,
         };
 
         await apiClient.post("/reserve", JSON.stringify(reserveData));
