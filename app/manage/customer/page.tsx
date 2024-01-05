@@ -13,6 +13,7 @@ import {
 import {
   InputHTMLAttributes,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -167,6 +168,9 @@ const CustomerRow = ({
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCinema, setSelectedCinema] = useState(-1);
   const [bookings, setBookings] = useState<Booking[]>();
+  const header = useRef<any | null>(null);
+  const cinemaDropdown = useRef<any | null>(null);
+
   const formatDate = (dateString: string): string => {
     const options: Intl.DateTimeFormatOptions = {
       year: "numeric",
@@ -176,7 +180,7 @@ const CustomerRow = ({
 
     const formattedDate = new Date(dateString).toLocaleDateString(
       undefined,
-      options
+      options,
     );
     return formattedDate;
   };
@@ -226,6 +230,28 @@ const CustomerRow = ({
 
     fetchData();
   }, [openModal, selectedCinema]);
+  useEffect(() => {
+    if (openModal) {
+      if (cinemaDropdown.current) {
+        const width =
+          cinemaDropdown.current.parentElement.parentElement.clientWidth - 100;
+        cinemaDropdown.current.style.width = `${width}px`;
+      }
+    }
+  }, [openModal, cinemaDropdown.current]);
+
+  useEffect(() => {
+    if (openModal) {
+      window.addEventListener("resize", (e) => {
+        if (cinemaDropdown.current) {
+          const width =
+            cinemaDropdown.current.parentElement.parentElement.clientWidth -
+            100;
+          cinemaDropdown.current.style.width = `${width}px`;
+        }
+      });
+    }
+  }, [openModal]);
 
   return (
     <>
@@ -272,7 +298,10 @@ const CustomerRow = ({
       </li>
       <Modal size={"8xl"} show={openModal} onClose={() => setOpenModal(false)}>
         <Modal.Header className="w-full">
-          <div className="flex items-center gap-4 justify-between sm:w-[500px] 2xl:w-[1770px] xl:w-[1200px]">
+          <div
+            ref={cinemaDropdown}
+            className="flex items-center gap-4 justify-between "
+          >
             <div>Lịch sử đặt vé</div>
 
             <div>
