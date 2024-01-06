@@ -10,7 +10,7 @@ interface Cinema {
   numberOfTickets: number;
 }
 
-export const TopCinemaTable = () => {
+export const TopCinemaTable = ({ timeOption }: { timeOption: number }) => {
   const [topCinemas, setTopCinemas] = useState<Cinema[] | null>();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -18,7 +18,9 @@ export const TopCinemaTable = () => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const response = await apiClient.get(`/statistics/cinema?TimeOption=3`);
+        const response = await apiClient.get(
+          `/statistics/cinema?TimeOption=${timeOption}`,
+        );
         const data = response.data;
         setTopCinemas(data.data as Cinema[]);
         setIsLoading(false);
@@ -28,12 +30,13 @@ export const TopCinemaTable = () => {
     };
 
     fetchData();
-  }, []);
+  }, [timeOption]);
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
-        Top Rạp
+        Top Rạp trong {timeOption === 0 && "ngày"} {timeOption === 1 && "tuần"}
+        {timeOption === 2 && "tháng"} {timeOption === 3 && "năm"}
       </h4>
 
       {isLoading && (
